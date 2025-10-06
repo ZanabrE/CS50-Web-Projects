@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Search</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    <body>
+        <div>
+            <ul class="navbar-links">
+                <li><a class="navbar-items" href="index.html">Google</a></li>
+            </ul>
+        </div><!--End of links-->
+        <p class="h1-text">Advance Search</p>
+        <div class="horizontal-line"></div>
+        <p class="h2-text">Find pages with...</p>
+        <form action="https://google.com/search">
+            <div class="row-input">
+                <div class="left-side">
+                    <p>all these words:</p>
+                </div>
+                <div class="right-side">
+                    <input class="form-control" type="text" name="as_q">
+                </div>
+            </div><!--End of the first row input-->
+            <div class="row-input">
+                <div class="left-side">
+                    <p>this exact words or phrase:</p>
+                </div>
+                <div class="right-side">
+                    <input class="form-control" type="text" name="as_epq">
+                </div>
+            </div><!--End of the second row input-->
+            <div class="row-input">
+                <div class="left-side">
+                    <p>any of theses words:</p>
+                </div>
+                <div class="right-side">
+                    <input class="form-control" type="text" name="as_oq">
+                </div>
+            </div><!--End of the third row input-->
+            <div class="row-input">
+                <div class="left-side">
+                    <p>none of these words:</p>
+                </div>
+                <div class="right-side">
+                    <input class="form-control" type="text" name="as_eq">
+                </div>
+            </div><!--End of the fourth row input-->
+            <div class="btn-submit">
+                <input type="submit" value="Advanced Search" class="btn btn-search">
+            </div><!--End of button-->
+        </form><!--End of search form-->
+    </body>
+</html>
