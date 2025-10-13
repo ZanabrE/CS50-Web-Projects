@@ -32,3 +32,15 @@ def entry(request, title):
             "content": html_page
         })
 
+def edit(request):
+    if request.method == "POST":
+        title = request.POST['entry']
+        content = util.get_entry(title)
+        return render(request, "encyclopedia/edit.html", {
+            "title": title,
+            "content": content
+        })
+    else:
+        return render(request, "encyclopedia/error.html", {
+            "message": "An error occurred."
+        })
