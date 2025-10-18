@@ -8,6 +8,10 @@
 
     <h1>New Page</h1>
 
+    {% if message %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endif %}
+    
     <form action="{% url 'new_page' %}" method="POST">
         {% csrf_token %}
         <div class="mb-3">
