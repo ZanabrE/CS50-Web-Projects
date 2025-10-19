@@ -87,7 +87,7 @@ def edit(request):
 def save_entry(request):
     if request.method == "POST":
         title = request.POST['title']
-        content = util.get_entry(title)
+        content = request.POST['content']
         util.save_entry(title, content)
         html_page = convert_md_to_html(title)
         return render(request, "encyclopedia/entry.html", {
