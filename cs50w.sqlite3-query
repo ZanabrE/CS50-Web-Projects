@@ -1,0 +1,4 @@
+-- database: ./cs50w.sqlite3
+
+SELECT * FROM flights
+ORDER BY `id` ASC;
