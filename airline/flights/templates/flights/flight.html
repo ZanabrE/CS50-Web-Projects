@@ -21,7 +21,7 @@
     <form action="{% url 'book' flight.id %}" method="post">
         {% csrf_token %}
         <select name="passenger">
-            {% for passenger in all_passengers %}
+            {% for passenger in non_passengers %}
                 <option value="{{ passenger.id }}">{{ passenger.first }} {{ passenger.last }}</option>
             {% endfor %}
         </select>
