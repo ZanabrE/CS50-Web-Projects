@@ -11,7 +11,7 @@
         <h1>Auctions</h1>
         <div>
             {% if user.is_authenticated %}
-                Signed in as <strong>{{ user.username }}</strong>.
+                <p class="alert alert-success" role="alert">Signed in as <strong>{{ user.username }}</strong>.</p>
             {% else %}
                 Not signed in.
             {% endif %}
