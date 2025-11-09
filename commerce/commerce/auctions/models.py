@@ -21,7 +21,7 @@ class Listing(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True, related_name="category")
 
     def __str__(self):
-        return f"{self.title} - Starting at ${self.starting_bid}"
+        return f"{self.title}"
 
 class Bid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
