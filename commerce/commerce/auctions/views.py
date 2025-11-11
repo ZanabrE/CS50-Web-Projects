@@ -23,7 +23,7 @@ def listing(request):
         # Getting the form data
         title = request.POST["title"]
         description = request.POST["description"]
-        starting_bid = request.POST["starting_bid"]
+        price = request.POST["price"]
         image_url = request.POST["image_url"]
         category = request.POST["category"]
 
