@@ -37,10 +37,10 @@ def listing(request):
         new_listing = Listing(
             title=title,
             description=description,
-            price=starting_bid,
-            imageURL=image_url if image_url else None,
-            owner=request.user,
-            category=category
+            price=float(price),
+            imageURL=image_url,
+            owner=current_user,
+            category=categoryDetails
         )
         # Saving the new listing
         new_listing.save()
