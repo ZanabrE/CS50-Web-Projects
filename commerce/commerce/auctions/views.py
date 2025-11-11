@@ -31,7 +31,7 @@ def listing(request):
         current_user = request.user
         
         # Getting the category object
-        category = Category.objects.get(categoryName=category)
+        categoryDetails = Category.objects.get(categoryName=category)
     
         # Creating and saving the new listing
         new_listing = Listing(
