@@ -3,6 +3,20 @@
 {% block body %}
     <h2>Active Listings</h2>
 
+    <form class="p-4 border rounded shadow-sm my-3" action="{% url 'category_view' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <select class="form-control" name="category" id="category">
+                <option value="" selected>Choose a category</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %} 
+            </select>
+        </div>
+
+        <button class="btn btn-warning" type="submit">Select</button>
+    </form>
+
     <div class="row">
         {% for listing in listings %}
             <div class="col-md-4 mb-4">
@@ -15,7 +29,7 @@
                         <p class="card-text">{{ listing.description }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <p class="mb-0">Price: ${{ listing.price }}</p>
-                            
+                            <a href="#" class="btn btn-primary">Buy Now</a>
                         </div>
                     </div>
                 </div>

@@ -9,9 +9,22 @@ from .models import User, Category, Listing, Bid, Comment
 
 def index(request):
     active_listings = Listing.objects.filter(isActive=True)
+    allCategories = Category.objects.all()
     return render(request, "auctions/index.html", {
-        "listings": active_listings
+        "listings": active_listings,
+        "categories": allCategories
     })
+
+def category_view(request):
+    if request.method == "POST":
+        categoryForm = request.POST["category"]
+        category = Category.objects.get(categoryName=categoryForm)
+        active_listings = Listing.objects.filter(isActive=True, category=category)
+        allCategories = Category.objects.all()
+        return render(request, "auctions/index.html", {
+            "listings": active_listings,
+            "categories": allCategories
+        })
 
 def listing(request):
     if request.method == "GET":
