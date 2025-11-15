@@ -3,7 +3,7 @@
 {% block body %}
     <h2>Create New Listing</h2>
 
-    <form class="p-4 border rounded shadow-sm" action="{% url 'listing' %}" method="POST">
+    <form class="p-4 border rounded shadow-sm" action="{% url 'newlisting' %}" method="POST">
         {% csrf_token %}
         <div class="form-group">
             <input class="form-control" type="text" name="title" placeholder="Title" required>
