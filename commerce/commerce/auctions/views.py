@@ -6,6 +6,8 @@ from django.urls import reverse
 
 from .models import User, Category, Listing, Bid, Comment
 
+def listingpage(request, id):
+    return render(request, "auctions/listingpage.html")
 
 def index(request):
     active_listings = Listing.objects.filter(isActive=True)
@@ -29,7 +31,7 @@ def category_view(request):
 def newlisting(request):
     if request.method == "GET":
         allCategories = Category.objects.all()
-        return render(request, "auctions/listing.html", {
+        return render(request, "auctions/newlisting.html", {
             "categories": allCategories
         })
     else:
