@@ -7,7 +7,10 @@ from django.urls import reverse
 from .models import User, Category, Listing, Bid, Comment
 
 def listingpage(request, id):
-    return render(request, "auctions/listingpage.html")
+    listingData = Listing.objects.get(pk=id)
+    return render(request, "auctions/listingpage.html", {
+        "listing": listingData
+    })
 
 def index(request):
     active_listings = Listing.objects.filter(isActive=True)
