@@ -26,7 +26,7 @@ def category_view(request):
             "categories": allCategories
         })
 
-def listing(request):
+def newlisting(request):
     if request.method == "GET":
         allCategories = Category.objects.all()
         return render(request, "auctions/listing.html", {
