@@ -8,8 +8,10 @@ from .models import User, Category, Listing, Bid, Comment
 
 def listingpage(request, id):
     listingData = Listing.objects.get(pk=id)
+    isListingInWatchlist = True
     return render(request, "auctions/listingpage.html", {
-        "listing": listingData
+        "listing": listingData,
+        "isListingInWatchlist": isListingInWatchlist
     })
 
 def index(request):
