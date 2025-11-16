@@ -1,6 +1,17 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+
+<div>
+    {% if user.is_authenticated %}
+        <a href="{% url 'add_to_watchlist' id=listing.id %}" class="btn btn-success mb-3">Add to Watchlist</a>
+    {% endif %}
+</div>
+
+
+
+
+
     <h2>Marvel Character: {{ listing.title }}</h2>
     <img src="{{ listing.imageUrl }}" class="img-fluid mb-4" alt="{{ listing.title }}">
     <p> Description: {{ listing.description}}</p>
