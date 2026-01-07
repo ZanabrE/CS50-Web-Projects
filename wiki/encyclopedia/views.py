@@ -34,13 +34,13 @@ def entry(request, title):
         })
 
 def search(request):
+    entries = util.list_entries()
     if request.method == "POST":
         entry_search = request.POST['q']
         html_page = convert_md_to_html(entry_search)
-        if html_page is not None:
-            return render(request, "encyclopedia/entry.html", {
-                "title": entry_search,
-                "content": html_page
+        if html_page == None:
+            return render(request, "encyclopedia/search.html", {
+                "entries": entries
             })
         else:
             allEntries = util.list_entries()
