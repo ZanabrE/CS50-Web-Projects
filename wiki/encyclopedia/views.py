@@ -48,8 +48,10 @@ def search(request):
             for entry in allEntries:
                 if entry_search.lower() in entry.lower():
                     extensions.append(entry)
-            return render(request, "encyclopedia/search.html", {
-                "extensions": extensions
+            return render(request, "encyclopedia/entry.html", {
+                "entries": util.list_entries(),
+                "title": entry_search,
+                "content": html_page
             })
 
 def new_page(request):
@@ -59,7 +61,7 @@ def new_page(request):
         title = request.POST['title']
         content = request.POST['content']
         titleExist = util.get_entry(title)
-        if titleExist is not None:
+        if titleExist == None:
             return render(request, "encyclopedia/error.html", {
                 "message": "Page already exists."
             })
