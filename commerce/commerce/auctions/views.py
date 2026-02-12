@@ -65,7 +65,7 @@ def newlisting(request):
         # Saving the new listing
         new_listing.save()
         # Redirecting to index page after successful creation
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse(index))
 
 def login_view(request):
     if request.method == "POST":
