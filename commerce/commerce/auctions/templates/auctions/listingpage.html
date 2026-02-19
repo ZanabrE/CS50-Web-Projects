@@ -5,7 +5,9 @@
 <div>
     {% if user.is_authenticated %}
         {% if isListingInWatchlist %}
-            <h1>Remove from Watchlist</h1>
+            <button name="action" value="remove">Remove from Watchlist</button>
+        {% else %}
+            <button name="action" value="add">Add to Watchlist</button>
         {% endif %}
     {% endif %}
 </div>
