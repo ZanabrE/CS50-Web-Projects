@@ -8,10 +8,14 @@ from .models import User, Category, Listing, Bid, Comment
 
 def listingpage(request, id):
     listingData = Listing.objects.get(pk=id)
-    isListingInWatchlist = True
+    isListingInWatchlist = request.user in listingData.watchlist.all()
+    allComments = Comment.objects.filter(listing=listingData)
+    isOwner = request.user.username == listingData.owner.username
     return render(request, "auctions/listingpage.html", {
         "listing": listingData,
-        "isListingInWatchlist": isListingInWatchlist
+        "isListingInWatchlist": isListingInWatchlist,
+        "allComments": allComments,
+        "isOwner": isOwner
     })
 
 def index(request):
