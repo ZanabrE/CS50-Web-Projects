@@ -18,6 +18,13 @@ def listingpage(request, id):
         "isOwner": isOwner
     })
 
+def watchlist(request):
+    user = request.user
+    listings = user.listingwatchlist.all()
+    return render(request, "auctions/watchlist.html", {
+        "listings": listings
+    })
+
 def index(request):
     active_listings = Listing.objects.filter(isActive=True)
     allCategories = Category.objects.all()
