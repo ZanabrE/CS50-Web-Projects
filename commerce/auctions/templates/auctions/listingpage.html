@@ -51,5 +51,48 @@
     <p><strong>Owner:</strong> {{ listing.owner}}</p>
     <p><strong>Price:</strong> ${{ listing.price.amount }}</p>
 
+    {% if user.is_authenticated %}
+        {% if listing.isActive %}
+            <form action="{% url 'place_bid' id=listing.id %}" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="bid_amount">Place a Bid:</label>
+                    <input type="number" step="any" class="form-control" id="bid_amount" name="bid_amount" placeholder="Enter your bid" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Place Bid</button>
+            </form>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                <strong>Warning:</strong> This listing has ended.
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <h2>Comments</h2>
+    {% if user.is_authenticated and listing.isActive %}
+        <form action="{% url 'add_comment' id=listing.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="comment">Add a Comment:</label>
+                <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Enter your comment here..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Comment</button>
+        </form>
+    {% elif not listing.isActive %}
+        <div class="alert alert-info" role="alert">
+            <strong>Warning:</strong> This listing has ended. You cannot add comments.
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        {% for comment in allComments %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <p class="card-text">{{ comment.content }}</p>
+                    <footer class="blockquote-footer">Comment by <cite title="Source Title">{{ comment.user }}</cite></footer>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}
