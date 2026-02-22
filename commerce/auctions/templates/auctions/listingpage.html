@@ -2,24 +2,54 @@
 
 {% block body %}
 
-<div>
-    {% if user.is_authenticated %}
-        {% if isListingInWatchlist %}
-            <button name="action" value="remove">Remove from Watchlist</button>
-        {% else %}
-            <button name="action" value="add">Add to Watchlist</button>
+    <div class="container">
+        {% if message%}
+            {% if updated %}
+                <div class="alert alert-success" role="alert">
+                    {{ message }}
+                </div>
+            {% else %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+            {% endif %}
         {% endif %}
+    </div>
+
+    {% if not listing.isActive and user == listing.price.user %}
+    <div class="alert alert-info" role="alert">
+        This listing has ended. You won the auction with a bid of ${{ listing.price.amount }}!
+    </div>
     {% endif %}
-</div>
 
+    <div class="row mb-4">
+        {% if user.is_authenticated  and listing.isActive%}
+            {% if isOwner %}
+                <form action="{% url 'close_auction' id=listing.id %}" class="mb-4" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Close Auction</button>
+                </form>
+            {% endif %}
 
-
-
+            {% if isListingInWatchlist %}
+                <form action="{% url 'remove_watchlist' id=listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <button name="action" value="remove">Remove from Watchlist</button>
+                </form>
+            {% else %}
+                <form action="{% url 'add_watchlist' id=listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <button name="action" value="add">Add to Watchlist</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
 
     <h2>Marvel Character: {{ listing.title }}</h2>
     <img src="{{ listing.imageUrl }}" class="img-fluid mb-4" alt="{{ listing.title }}">
-    <p> Description: {{ listing.description}}</p>
-    <p> Owner: {{ listing.owner}}</p>
-    <p>Price: ${{ listing.price}}</p>
-    
+    <p><strong>Description:</strong> {{ listing.description}}</p>
+    <p><strong>Owner:</strong> {{ listing.owner}}</p>
+    <p><strong>Price:</strong> ${{ listing.price.amount }}</p>
+
+
 {% endblock %}
