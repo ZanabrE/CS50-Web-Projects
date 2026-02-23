@@ -41,7 +41,7 @@ def place_bid(request, id):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "This auction is already closed.",
-            "updated": False,
+            "updated": True,
             "isListingInWatchlist": listingData.watchlist.filter(id=request.user.id).exists(),
             "allComments": Comment.objects.filter(listing=listingData),
             "isOwner": request.user == listingData.owner,
@@ -53,7 +53,7 @@ def place_bid(request, id):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "Invalid bid format.",
-            "updated": False,
+            "updated": True,
             "isListingInWatchlist": request.user in listingData.watchlist.all(),
             "allComments": Comment.objects.filter(listing=listingData),
             "isOwner": request.user.username == listingData.owner.username,
@@ -114,7 +114,8 @@ def add_comment(request, id):
 
 def watchlist(request):
     user = request.user
-    listings = user.user_watchlist.all()
+    #listings = user.user_watchlist.all()
+    listings = Listing.objects.filter(watchlist=request.user)
     return render(request, "auctions/watchlist.html", {
         "listings": listings
     })
