@@ -41,7 +41,7 @@ def place_bid(request, id):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "This auction is already closed.",
-            "updated": True,
+            "updated": False,
             "isListingInWatchlist": listingData.watchlist.filter(id=request.user.id).exists(),
             "allComments": Comment.objects.filter(listing=listingData),
             "isOwner": request.user == listingData.owner,
@@ -53,7 +53,7 @@ def place_bid(request, id):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "Invalid bid format.",
-            "updated": True,
+            "updated": False,
             "isListingInWatchlist": request.user in listingData.watchlist.all(),
             "allComments": Comment.objects.filter(listing=listingData),
             "isOwner": request.user.username == listingData.owner.username,
@@ -142,14 +142,21 @@ def index(request):
 
 def category_view(request):
     if request.method == "POST":
-        categoryForm = request.POST["category"]
-        category = Category.objects.get(categoryName=categoryForm)
-        active_listings = Listing.objects.filter(isActive=True, category=category)
-        allCategories = Category.objects.all()
-        return render(request, "auctions/index.html", {
-            "listings": active_listings,
-            "categories": allCategories
-        })
+        form = request.POST.get('category')
+        if form != '':
+            categoryForm = request.POST["category"]
+            category = Category.objects.get(categoryName=categoryForm)
+            active_listings = Listing.objects.filter(isActive=True, category=category)
+            allCategories = Category.objects.all()
+            return render(request, "auctions/index.html", {
+                "listings": active_listings,
+                "categories": allCategories
+            })
+        else:
+            return render(request, "auctions/index.html", {
+                "listings": Listing.objects.filter(isActive=True),
+                "categories": Category.objects.all(),
+            })
 
 def newlisting(request):
     if request.method == "GET":

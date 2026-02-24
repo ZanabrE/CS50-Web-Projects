@@ -25,19 +25,19 @@
     <div class="row mb-4">
         {% if user.is_authenticated  and listing.isActive%}
             {% if isOwner %}
-                <form action="{% url 'close_auction' id=listing.id %}" class="mb-4" method="POST">
+                <form action="{% url 'close_auction' listing.id %}" class="mb-4" method="POST">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Close Auction</button>
                 </form>
             {% endif %}
 
             {% if isListingInWatchlist %}
-                <form action="{% url 'remove_watchlist' id=listing.id %}" method="POST">
+                <form action="{% url 'remove_watchlist' listing.id %}" method="POST">
                     {% csrf_token %}
                     <button name="action" value="remove">Remove from Watchlist</button>
                 </form>
             {% else %}
-                <form action="{% url 'add_watchlist' id=listing.id %}" method="POST">
+                <form action="{% url 'add_watchlist' listing.id %}" method="POST">
                     {% csrf_token %}
                     <button name="action" value="add">Add to Watchlist</button>
                 </form>
