@@ -2,7 +2,7 @@
 
 {% block body %}
     <h2>Watchlist</h2>
-    <div class="row mx-3">
+    <div class="card mb-4 card-body">
         {% for listing in listings %}
             <div class="card" style="width: 18rem;">
                 <img src="{{ listing.imageURL }}" class="card-img-top" alt="{{ listing.title }}">

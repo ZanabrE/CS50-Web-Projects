@@ -45,11 +45,16 @@
         {% endif %}
     </div>
 
-    <h2>Marvel Character: {{ listing.title }}</h2>
-    <img src="{{ listing.imageURL }}" class="img-fluid mb-4" alt="{{ listing.title }}">
-    <p><strong>Description:</strong> {{ listing.description}}</p>
-    <p><strong>Owner:</strong> {{ listing.owner}}</p>
-    <p><strong>Price:</strong> ${{ listing.price.amount }}</p>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Marvel Character: {{ listing.title }}</h2>
+            <img src="{{ listing.imageURL }}" class="img-fluid mb-4" alt="{{ listing.title }}">
+            <p><strong>Description:</strong> {{ listing.description}}</p>
+            <p><strong>Owner:</strong> {{ listing.owner}}</p>
+            <p><strong>Price:</strong> ${{ listing.price }}</p>
+            <p><strong>Category:</strong> {{ listing.category }}</p>
+        </div>
+    </div>
 
     {% if user.is_authenticated %}
         {% if listing.isActive %}
