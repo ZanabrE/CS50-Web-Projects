@@ -41,7 +41,7 @@ def place_bid(request, id):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "This auction is already closed.",
-            "updated": False,
+            "updated": True,
             "isListingInWatchlist": listingData.watchlist.filter(id=request.user.id).exists(),
             "allComments": Comment.objects.filter(listing=listingData),
             "isOwner": request.user == listingData.owner,
