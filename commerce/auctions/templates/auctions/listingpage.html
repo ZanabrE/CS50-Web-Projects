@@ -23,7 +23,7 @@
     {% endif %}
 
     <div class="row mb-4">
-        {% if user.is_authenticated  and listing.isActive%}
+        {% if user.is_authenticated  and listing.isActive %}
             {% if isOwner %}
                 <form action="{% url 'close_auction' listing.id %}" class="mb-4" method="POST">
                     {% csrf_token %}
@@ -47,22 +47,22 @@
 
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="card-title">Marvel Character: {{ listing.title }}</h2>
-            <img src="{{ listing.imageURL }}" class="img-fluid mb-4" alt="{{ listing.title }}">
-            <p><strong>Description:</strong> {{ listing.description}}</p>
-            <p><strong>Owner:</strong> {{ listing.owner}}</p>
-            <p><strong>Price:</strong> ${{ listing.price }}</p>
-            <p><strong>Category:</strong> {{ listing.category }}</p>
+            <h2 class="card-title">Marvel Character: {{ listings.title }}</h2>
+            <img src="{{ listings.imageURL }}" class="img-fluid mb-4 p-4 border rounded shadow-sm my-3" alt="{{ listing.title }}" width="300" height="600">
+            <p><strong>Description:</strong> {{ listings.description}}</p>
+            <p><strong>Owner:</strong> {{ listings.owner}}</p>
+            <p><strong>Price:</strong> ${{ listings.price }}</p>
+            <p><strong>Category:</strong> {{ listings.category }}</p>
         </div>
     </div>
 
     {% if user.is_authenticated %}
         {% if listing.isActive %}
-            <form action="{% url 'place_bid' id=listing.id %}" method="POST">
+            <form action="{% url 'place_bid' listing.id %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="bid_amount">Place a Bid:</label>
-                    <input type="number" step="any" class="form-control" id="bid_amount" name="bid_amount" placeholder="Enter your bid" required>
+                    <input type="number" step="any" class="form-control" id="bid_amount" name="new_bid" placeholder="Enter your bid" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Place Bid</button>
             </form>
@@ -75,7 +75,7 @@
 
     <h2>Comments</h2>
     {% if user.is_authenticated and listing.isActive %}
-        <form action="{% url 'add_comment' id=listing.id %}" method="POST">
+        <form action="{% url 'add_comment' listing.id %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="comment">Add a Comment:</label>

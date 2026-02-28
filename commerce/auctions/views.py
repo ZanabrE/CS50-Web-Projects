@@ -48,7 +48,7 @@ def place_bid(request, id):
         })
 
     try:
-        newBid = float(request.POST['newBid'])
+        new_bid = float(request.POST['new_bid'])
     except:
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
@@ -63,8 +63,8 @@ def place_bid(request, id):
     allComments = Comment.objects.filter(listing=listingData)
     isOwner = request.user.username == listingData.owner.username
     
-    if newBid > listingData.price.bid:
-        updateBid = Bid(user=request.user, bid=newBid)
+    if new_bid > listingData.price.bid:
+        updateBid = Bid(user=request.user, bid=new_bid)
         updateBid.save()
         listingData.price = updateBid
         listingData.save()
