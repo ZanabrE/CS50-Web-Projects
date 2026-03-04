@@ -2,10 +2,8 @@
 
 {% block body %}
 
-    <h2>{{ listing.title }}</h2>
-
     <div class="container">
-        {% if message%}
+        {% if message %}
             {% if updated %}
                 <div class="alert alert-success" role="alert">
                     {{ message }}
@@ -18,23 +16,25 @@
         {% endif %}
     </div>
 
-    {% if not listing.isActive and user == listing.price.user %}
-    <div class="alert alert-info" role="alert">
-        This listing has ended. You won the auction with a bid of ${{ listings.price }}!
-    </div>
+    {% if not listings.isActive %}
+        {% if last_bidder == user %}
+            <div class="alert alert-info">
+                You won the auction with a bid of ${{ listings.price }}!
+            </div>
+        {% endif %}
     {% endif %}
 
     <div class="row mb-4">
         {% if request.user.is_authenticated and listing.isActive %}
             {% if isOwner %}
-                <form action="{% url 'close_auction' listing.id %}" class="mb-4" method="POST">
+                <form action="{% url 'close_auction' listings.id %}" class="mb-4" method="POST">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Close Auction</button>
                 </form>
             {% endif %}
 
             {% if isListingInWatchlist %}
-                <form action="{% url 'remove_watchlist' listing.id %}" method="POST">
+                <form action="{% url 'remove_watchlist' listings.id %}" method="POST">
                     {% csrf_token %}
                     <button name="action" value="remove">Remove from Watchlist</button>
                 </form>
@@ -47,23 +47,27 @@
         {% endif %}
     </div>
 
+    <h2 class="card-title">Listing Details: {{ listings.title }}</h2>
     <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="card-title">Marvel Character: {{ listing.title }}</h2>
+        <div class="card d-flex flex-row">
             <img src="{{ listings.imageURL }}" class="img-fluid mb-4 p-4 border rounded shadow-sm my-3" alt="{{ listing.title }}" width="300" height="600">
-            <p><strong>Description:</strong> {{ listings.description}}</p>
-            <p><strong>Owner:</strong> {{ listings.owner}}</p>
-            <p><strong>Price:</strong> ${{ listings.price }}</p>
-            <p><strong>Category:</strong> {{ listings.category }}</p>
+
+            <div class="card-body">
+                <p><strong>Description:</strong> {{ listings.description}}</p>
+                <p><strong>Owner:</strong> {{ listings.owner}}</p>
+                <p><strong>Price:</strong> ${{ listings.price }}</p>
+                <p><strong>Category:</strong> {{ listings.category }}</p>
+            </div>
         </div>
     </div>
 
+    
     {% if user.is_authenticated %}
-        {% if listing.isActive %}
-            <form action="{% url 'place_bid' listing.id %}" method="POST">
+        {% if listings.isActive %}
+            <form action="{% url 'place_bid' listings.id %}" method="POST">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="bid_amount">Place a Bid:</label>
+                    <label for="bid_amount"><strong>Place a Bid:</strong></label>
                     <input type="number" step="any" class="form-control" id="bid_amount" name="new_bid" placeholder="Enter your bid" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Place Bid</button>
@@ -74,18 +78,20 @@
             </div>
         {% endif %}
     {% endif %}
+    
+    <br>
 
     <h2>Comments</h2>
-    {% if user.is_authenticated and listing.isActive %}
-        <form action="{% url 'add_comment' listing.id %}" method="POST">
+    {% if user.is_authenticated and listings.isActive %}
+        <form action="{% url 'add_comment' listings.id %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="comment">Add a Comment:</label>
-                <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Enter your comment here..." required></textarea>
+                <textarea class="form-control" id="comment" name="new_comment" rows="3" placeholder="Enter your comment here..." required></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Add Comment</button>
         </form>
-    {% elif not listing.isActive %}
+    {% elif not listings.isActive %}
         <div class="alert alert-info" role="alert">
             <strong>Warning:</strong> This listing has ended. You cannot add comments.
         </div>

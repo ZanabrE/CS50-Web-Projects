@@ -103,7 +103,7 @@ def add_comment(request, id):
         })
 
     user = request.user
-    message = request.POST["newComment"]
+    message = request.POST["new_comment"]
 
     newComment = Comment(
         author=user,
