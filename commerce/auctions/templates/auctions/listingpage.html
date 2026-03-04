@@ -20,7 +20,7 @@
 
     {% if not listing.isActive and user == listing.price.user %}
     <div class="alert alert-info" role="alert">
-        This listing has ended. You won the auction with a bid of ${{ listing.price.amount }}!
+        This listing has ended. You won the auction with a bid of ${{ listings.price }}!
     </div>
     {% endif %}
 
