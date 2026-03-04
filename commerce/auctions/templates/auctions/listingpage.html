@@ -86,7 +86,7 @@
         <form action="{% url 'add_comment' listings.id %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
-                <label for="comment">Add a Comment:</label>
+                <label for="comment"><strong>Add a Comment:</strong></label>
                 <textarea class="form-control" id="comment" name="new_comment" rows="3" placeholder="Enter your comment here..." required></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Add Comment</button>
