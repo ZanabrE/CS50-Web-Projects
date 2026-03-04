@@ -113,9 +113,7 @@ def add_comment(request, id):
     return HttpResponseRedirect(reverse("listingpage", args=(id,)))
 
 def watchlist(request):
-    user = request.user
-    #listings = user.user_watchlist.all()
-    listings = Listing.objects.filter(watchlist=request.user)
+    listings = request.user.user_watchlist.all()
     return render(request, "auctions/watchlist.html", {
         "listings": listings
     })
