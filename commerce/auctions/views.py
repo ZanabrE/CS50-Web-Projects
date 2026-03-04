@@ -9,13 +9,21 @@ from .models import User, Category, Listing, Bid, Comment
 def listingpage(request, id):
     listingData = Listing.objects.get(pk=id)
     isListingInWatchlist = request.user in listingData.watchlist.all()
-    allComments = Comment.objects.filter(listing=listingData)
-    isOwner = request.user.username == listingData.owner.username
+    allComments = listingData.comments.all() # Using the related name to access comments directly from the listing object
+    isOwner = request.user.username == listingData.owner
+    
+    # Get the last bid object for this listing, if it exists, and pass it to the template
+    last_bid = listingData.bids.order_by('-amount').first()  # Get the highest bid for the listing
+    
+    # Identify the last bidder, if there is a last bid
+    last_bidder = last_bid.bidder if last_bid else None
+    
     return render(request, "auctions/listingpage.html", {
         "listings": listingData,
         "isListingInWatchlist": isListingInWatchlist,
         "allComments": allComments,
-        "isOwner": isOwner
+        "isOwner": isOwner,
+        "last_bidder": last_bidder
     })
 
 def close_auction(request, id):

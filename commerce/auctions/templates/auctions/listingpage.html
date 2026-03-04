@@ -16,12 +16,14 @@
         {% endif %}
     </div>
 
-    {% if not listings.isActive %}
-        {% if last_bidder == user %}
-            <div class="alert alert-info">
-                You won the auction with a bid of ${{ listings.price }}!
-            </div>
-        {% endif %}
+    {% if not listings.isActive and user == last_bidder %}
+        <div class="alert alert-info">
+            Congratulations! You won the auction with a bid of ${{ listings.price }}!
+        </div>
+    {% elif not listings.isActive and last_bidder %}
+        <div class="alert alert-secondary" role="alert">
+            This auction has ended. The winning bid was ${{ listings.price }} by {{ last_bidder.username }}.
+        </div>
     {% endif %}
 
     <div class="row mb-4">
@@ -50,7 +52,7 @@
     <h2 class="card-title">Listing Details: {{ listings.title }}</h2>
     <div class="card mb-4">
         <div class="card d-flex flex-row">
-            <img src="{{ listings.imageURL }}" class="img-fluid mb-4 p-4 border rounded shadow-sm my-3" alt="{{ listing.title }}" width="300" height="600">
+            <img src="{{ listings.imageURL }}" style="margin-left: 10px;" class="img-fluid mb-4 p-4 border rounded shadow-sm my-3" alt="{{ listing.title }}" width="300" height="600">
 
             <div class="card-body">
                 <p><strong>Description:</strong> {{ listings.description}}</p>
