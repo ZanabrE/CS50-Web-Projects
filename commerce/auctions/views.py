@@ -42,48 +42,50 @@ def place_bid(request, id):
             "listings": listingData,
             "message": "This auction is already closed.",
             "updated": True,
-            "isListingInWatchlist": listingData.watchlist.filter(id=request.user.id).exists(),
-            "allComments": Comment.objects.filter(listing=listingData),
+            "isListingInWatchlist": request.user in listingData.watchlist.all(),
+            "allComments": listingData.comments.all(), # Using the related name to access comments directly from the listing object
             "isOwner": request.user == listingData.owner,
         })
 
     try:
-        new_bid = float(request.POST['new_bid'])
-    except:
+        # Attempt to convert the bid to a float, if it fails, return an error message
+        new_bid_value = Decimal(request.POST['new_bid'])
+    except (ValueError, KeyError, decimal.InvalidOperation):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "Invalid bid format.",
             "updated": False,
             "isListingInWatchlist": request.user in listingData.watchlist.all(),
-            "allComments": Comment.objects.filter(listing=listingData),
-            "isOwner": request.user.username == listingData.owner.username,
+            "allComments": listingData.comments.all(),
+            "isOwner": request.user == listingData.owner,
         })
-
-    isListingInWatchlist = request.user in listingData.watchlist.all()
-    allComments = Comment.objects.filter(listing=listingData)
-    isOwner = request.user.username == listingData.owner.username
     
-    if new_bid > listingData.price.bid:
-        updateBid = Bid(user=request.user, bid=new_bid)
-        updateBid.save()
-        listingData.price = updateBid
+    # Check if the new bid is higher than the current price
+    if new_bid_value > listingData.price:
+        # Update the listing with the new bid
+        new_bid_obj = Bid(bidder=request.user, amount=new_bid_value)
+        new_bid_obj.save()
+        
+        # Update the listing's price to the new bid amount
+        listingData.price = new_bid_value
         listingData.save()
+        
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "Bid was updated successfully!",
             "updated": True,
-            "isListingInWatchlist": isListingInWatchlist,
-            "allComments": allComments,
-            "isOwner": isOwner,
+            "isListingInWatchlist": request.user in listingData.watchlist.all(),
+            "allComments": listingData.comments.all(),
+            "isOwner": request.user == listingData.owner,
         })
     else:
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "Your bid must be higher than the current price.",
             "updated": False,
-            "isListingInWatchlist": isListingInWatchlist,
-            "allComments": allComments,
-            "isOwner": isOwner,
+            "isListingInWatchlist": request.user in listingData.watchlist.all(),
+            "allComments": listingData.comments.all(),
+            "isOwner": request.user == listingData.owner,
         })
         
 def add_comment(request, id):
