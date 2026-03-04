@@ -63,7 +63,7 @@ def place_bid(request, id):
     # Check if the new bid is higher than the current price
     if new_bid_value > listingData.price:
         # Update the listing with the new bid
-        new_bid_obj = Bid(bidder=request.user, amount=new_bid_value)
+        new_bid_obj = Bid(bidder=request.user, amount=new_bid_value, listing=listingData)
         new_bid_obj.save()
         
         # Update the listing's price to the new bid amount
