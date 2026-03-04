@@ -7,8 +7,8 @@
             <div class="card" style="width: 18rem;">
                 <img src="{{ listing.imageURL }}" class="card-img-top" alt="{{ listing.title }}">
                 <div class="card-body">
-                    <h5 class="card-title">{{ listing.title }}</h5>
-                    <p class="card-text">{{ listing.description }}</p>
+                    <h5 class="card-title">{{ listings.title }}</h5>
+                    <p class="card-text">{{ listings.description }}</p>
                     <a href="{% url 'listingpage' listing.id %}" class="btn btn-primary">Details</a>
                 </div>
             </div>

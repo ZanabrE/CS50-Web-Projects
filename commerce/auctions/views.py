@@ -113,12 +113,12 @@ def add_comment(request, id):
     user = request.user
     message = request.POST["new_comment"]
 
-    newComment = Comment(
+    new_comment = Comment(
         author=user,
         listing=listingData,
         message=message
     )
-    newComment.save()
+    new_comment.save()
 
     return HttpResponseRedirect(reverse("listingpage", args=(id,)))
 
