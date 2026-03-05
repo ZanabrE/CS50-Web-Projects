@@ -19,14 +19,14 @@ class Listing(models.Model):
     isActive = models.BooleanField(default=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name="user")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True, related_name="category")
-    watchlist = models.ManyToManyField(User, blank=True, null=True, related_name="user_watchlist")
+    watchlist = models.ManyToManyField(User, blank=True, related_name="user_watchlist")
 
     def __str__(self):
         return f"{self.title}"
 
 class Bid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    bidder = models.ForeignKey(User, on_delete=models.CASCADE)
+    bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_bids")
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids", null=True)
 
     def __str__(self):
@@ -34,7 +34,7 @@ class Bid(models.Model):
     
 class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
-    commenter = models.ForeignKey(User, on_delete=models.CASCADE)
+    commenter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_comments")
     content = models.TextField()
 
     def __str__(self):

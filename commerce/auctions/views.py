@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from decimal import Decimal, InvalidOperation
 
 from .models import User, Category, Listing, Bid, Comment
 
@@ -32,7 +33,7 @@ def close_auction(request, id):
     listingData.save()
     isListingInWatchlist = request.user in listingData.watchlist.all()
     allComments = Comment.objects.filter(listing=listingData)
-    isOwner = request.user.username == listingData.owner.username
+    isOwner = request.user == listingData.owner
     return render(request, "auctions/listingpage.html", {
         "listings": listingData,
         "isListingInWatchlist": isListingInWatchlist,
@@ -107,7 +108,7 @@ def add_comment(request, id):
             "updated": False,
             "isListingInWatchlist": request.user in listingData.watchlist.all(),
             "allComments": Comment.objects.filter(listing=listingData),
-            "isOwner": request.user.username == listingData.owner.username,
+            "isOwner": request.user == listingData.owner,
         })
 
     user = request.user
@@ -190,7 +191,7 @@ def newlisting(request):
         new_listing = Listing(
             title=title,
             description=description,
-            price=float(price),
+            price=Decimal(price),
             imageURL=image_url,
             owner=current_user,
             category=categoryDetails
@@ -198,7 +199,7 @@ def newlisting(request):
         # Saving the new listing
         new_listing.save()
         # Redirecting to index page after successful creation
-        return HttpResponseRedirect(reverse(index))
+        return HttpResponseRedirect(reverse("index"))
 
 def login_view(request):
     if request.method == "POST":
