@@ -105,7 +105,7 @@
             {% for comment in allComments %}
                 <div class="card mb-2">
                     <div class="card-body py-2">
-                        <strong>{{ comment.author.username }}</strong> {{ comment.message }}
+                        <strong>{{ comment.commenter.username }}</strong> {{ comment.content }}
                     </div>
                 </div>
             {% empty %}

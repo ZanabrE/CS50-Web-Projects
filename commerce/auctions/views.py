@@ -11,7 +11,7 @@ def listingpage(request, id):
     listingData = Listing.objects.get(pk=id)
     isListingInWatchlist = request.user in listingData.watchlist.all()
     allComments = listingData.comments.all() # Using the related name to access comments directly from the listing object
-    isOwner = request.user.username == listingData.owner
+    isOwner = request.user == listingData.owner
     
     # Get the last bid object for this listing, if it exists, and pass it to the template
     last_bid = listingData.bids.order_by('-amount').first()  # Get the highest bid for the listing
@@ -23,7 +23,7 @@ def listingpage(request, id):
         "listings": listingData,
         "isListingInWatchlist": isListingInWatchlist,
         "allComments": allComments,
-        "isOwner": isOwner,
+        "isOwner": request.user == listingData.owner,
         "last_bidder": last_bidder
     })
 
@@ -59,7 +59,7 @@ def place_bid(request, id):
     try:
         # Attempt to convert the bid to a float, if it fails, return an error message
         new_bid_value = Decimal(request.POST['new_bid'])
-    except (ValueError, KeyError, decimal.InvalidOperation):
+    except (ValueError, KeyError, InvalidOperation):
         return render(request, "auctions/listingpage.html", {
             "listings": listingData,
             "message": "Invalid bid format.",
@@ -98,30 +98,19 @@ def place_bid(request, id):
         })
         
 def add_comment(request, id):
-    listingData = Listing.objects.get(pk=id)
-
-    # Prevent commenting on closed auctions
-    if not listingData.isActive:
-        return render(request, "auctions/listingpage.html", {
-            "listings": listingData,
-            "message": "This auction is closed. Comments are not allowed.",
-            "updated": False,
-            "isListingInWatchlist": request.user in listingData.watchlist.all(),
-            "allComments": Comment.objects.filter(listing=listingData),
-            "isOwner": request.user == listingData.owner,
-        })
-
-    user = request.user
-    message = request.POST["new_comment"]
-
-    new_comment = Comment(
-        author=user,
-        listing=listingData,
-        message=message
-    )
-    new_comment.save()
-
+    if request.method == "POST":
+        content = request.POST["new_comment"]
+        listings = Listing.objects.get(pk=id)
+        
+        # Create a new comment object and save it to the database
+        new_comment = Comment(
+            commenter=request.user,
+            listing=listings,
+            content=content
+        )
+        new_comment.save()
     return HttpResponseRedirect(reverse("listingpage", args=(id,)))
+    
 
 def watchlist(request):
     listings = request.user.user_watchlist.all()
