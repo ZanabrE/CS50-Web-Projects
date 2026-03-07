@@ -138,23 +138,23 @@ def index(request):
         "categories": allCategories
     })
 
+def categories(request):
+    allCategories = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": allCategories
+    })
+    
 def category_view(request):
     if request.method == "POST":
-        form = request.POST.get('category')
-        if form != '':
-            categoryForm = request.POST["category"]
-            category = Category.objects.get(categoryName=categoryForm)
-            active_listings = Listing.objects.filter(isActive=True, category=category)
-            allCategories = Category.objects.all()
+        category = request.POST.get('category')
+        if category:    
+            category = Category.objects.get(categoryName=category)
+            listings = Listing.objects.filter(category=category, isActive=True)
             return render(request, "auctions/index.html", {
-                "listings": active_listings,
-                "categories": allCategories
-            })
-        else:
-            return render(request, "auctions/index.html", {
-                "listings": Listing.objects.filter(isActive=True),
-                "categories": Category.objects.all(),
-            })
+                "listings": listings,
+                "category": category
+        })
+    return HttpResponseRedirect(reverse("categories"))
 
 def newlisting(request):
     if request.method == "GET":
