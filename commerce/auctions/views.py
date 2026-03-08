@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
+from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -29,19 +30,24 @@ def listingpage(request, id):
 
 def close_auction(request, id):
     listingData = Listing.objects.get(pk=id)
-    listingData.isActive = False
-    listingData.save()
-    isListingInWatchlist = request.user in listingData.watchlist.all()
-    allComments = Comment.objects.filter(listing=listingData)
-    isOwner = request.user == listingData.owner
-    return render(request, "auctions/listingpage.html", {
-        "listings": listingData,
-        "isListingInWatchlist": isListingInWatchlist,
-        "allComments": allComments,
-        "isOwner": isOwner,
-        "updated": True,
-        "message": "Auction closed successfully."
-    })
+    
+    # Check if the user is the owner of the listing before allowing them to close the auction
+    if request.user == listingData.owner:
+        listingData.isActive = False
+        listingData.save()
+        isListingInWatchlist = request.user in listingData.watchlist.all()
+        allComments = Comment.objects.filter(listing=listingData)
+        isOwner = request.user == listingData.owner
+        return render(request, "auctions/listingpage.html", {
+            "listings": listingData,
+            "isListingInWatchlist": isListingInWatchlist,
+            "allComments": allComments,
+            "isOwner": isOwner,
+            "updated": True,
+            "message": "Auction closed successfully."
+        })
+    # If the user is not the owner, redirect back to the listing page without making any changes
+    return HttpResponseRedirect(reverse("listingpage", args=(id,)))
 
 def place_bid(request, id):
     listingData = Listing.objects.get(pk=id)
@@ -139,14 +145,18 @@ def index(request):
     })
 
 def categories(request):
-    allCategories = Category.objects.all()
+    #allCategories = Category.objects.all()
+    allCategories = Category.objects.annotate(
+        active_count=Count('category', filter=Q(category__isActive=True))
+    )
+    
     return render(request, "auctions/categories.html", {
         "categories": allCategories
     })
     
 def category_view(request):
-    if request.method == "POST":
-        category = request.POST.get('category')
+    if request.method == "GET":
+        category = request.GET.get('category')
         if category:    
             category = Category.objects.get(categoryName=category)
             listings = Listing.objects.filter(category=category, isActive=True)

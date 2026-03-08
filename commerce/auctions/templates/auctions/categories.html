@@ -6,11 +6,16 @@
 
 {% block body %}
     <h1>Categories</h1>
-    <ul>
+    <div class="category-grid">
         {% for category in categories %}
-            <li>
-                <a href="{% url 'category_view' %}?category={{ category.categoryName }}">{{ category.categoryName }}</a>
-            </li>
+            <a href="{% url 'category_view' %}?category={{ category.categoryName }}" class="text-decoration-none" method="post" style="display:inline;">
+                <div class="category-info">
+                    <h3>{{ category.categoryName }}</h3>
+                    <p>{{ category.active_count }} Active Listings</p>
+                </div>
+            </a>
+        {% empty %}
+            <p>No categories found.</p>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock %}
