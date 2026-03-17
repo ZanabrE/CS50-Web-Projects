@@ -5,8 +5,8 @@
     <div class="row">
         {% for listing in listings %}
             <div class="col-12 mb-13">
-                <div class="card flex-row align-itmes-center p-3">
-                    <img src="{{ listing.imageURL }}" class="img-thumbnail" style="width: 375px; height: 375px; object-fit: cover;" alt="{{ listing.title }}">
+                <div class="card flex-row align-items-center p-3">
+                    <img src="{{ listing.imageURL }}" class="img-thumbnail" style="max-width: 250px; width: 100%; object-fit: cover;" alt="{{ listing.title }}">
                     <div class="card-body">
                         <h5 class="card-title"><a href="{% url 'listingpage' listing.id %}">{{ listing.title }}</a></h5>
                         <p class="card-text">Current Price: <strong>${{ listing.price }}</strong></p>
