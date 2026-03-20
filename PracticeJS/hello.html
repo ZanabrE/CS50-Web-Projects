@@ -6,7 +6,7 @@
         <title>Document</title>
 
         <script>
-            function myFunction() {
+            /*function myFunction() {
                 // Toggle the content of the <h1> element between "Hello World!" and "Good Bye!"
                 // Using an improvement of the if statement to check the current content of the <h1> element and change it accordingly
                 let heading = document.querySelector("h1"); // Get the current content of the <h1> element
@@ -15,13 +15,27 @@
                 } else {
                     heading.innerHTML = "Hello World!"; // Change the content of the <h1> element
                 }
-            }
+            }*/
+
+            //Adding an event listener to the form to handle the submit event and display an alert with the entered name
+            document.addEventListener("DOMContentLoaded", function() {
+                
+                document.querySelector("form").onsubmit = function() {
+                    const name = document.querySelector('#name').value;
+                    alert(`Hello, ${name}!`);
+                };
+            });
+
+            
         </script>
     </head> 
     <body>
         <h1>Hello World!</h1>
-        <p>This is my first JavaScript code.</p>
-        <button onclick="myFunction()">Click me</button>
+        
+        <form>
+            <input autofocus type="text" id="name" placeholder="Enter your name">
+            <input type="submit" value="Submit">
+        </form>
         
     </body>
 </html>
