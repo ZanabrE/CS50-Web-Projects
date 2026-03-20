@@ -18,12 +18,19 @@
                     alert(`Count is a multiple of 10: ${count}`);
                 }
             }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                //document.querySelector("button").addEventListener("click", myFunction); // one way to add event listener to the button
+                document.querySelector("button").onclick = myFunction; // another way to add event listener to the button
+            });
+
         </script>
     </head> 
     <body>
         <h1>Counter</h1>
         <p id="counter">Count: 0</p>
         <p>This is my first JavaScript code.</p>
-        <button onclick="myFunction()">Count</button>
+        <!--<button onclick="myFunction()">Count</button>-->
+        <button>Count</button>
     </body>
 </html>
