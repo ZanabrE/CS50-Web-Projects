@@ -7,13 +7,21 @@
 
         <script>
             function myFunction() {
-                alert("Hello World");
+                // Toggle the content of the <h1> element between "Hello World!" and "Good Bye!"
+                // Using an improvement of the if statement to check the current content of the <h1> element and change it accordingly
+                let heading = document.querySelector("h1"); // Get the current content of the <h1> element
+                if (heading.innerHTML === "Hello World!") {
+                    heading.innerHTML = "Good Bye!"; // Change the content of the <h1> element
+                } else {
+                    heading.innerHTML = "Hello World!"; // Change the content of the <h1> element
+                }
             }
         </script>
     </head> 
     <body>
-        <h1>Hello World</h1>
+        <h1>Hello World!</h1>
         <p>This is my first JavaScript code.</p>
         <button onclick="myFunction()">Click me</button>
+        
     </body>
 </html>
