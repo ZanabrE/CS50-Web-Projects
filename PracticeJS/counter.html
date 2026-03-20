@@ -12,6 +12,11 @@
                 count++;
                 //alert("Count: " + count);
                 document.getElementById("counter").innerHTML = "Count: " + count;
+
+                // Using if stament to check if the count is a multiple of 10 and display an alert message
+                if (count % 10 === 0) {
+                    alert(`Count is a multiple of 10: ${count}`);
+                }
             }
         </script>
     </head> 
