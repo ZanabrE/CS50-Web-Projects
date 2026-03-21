@@ -8,10 +8,33 @@
         <script>
             // Adding an event listener after a DOM content is loaded to handle the submit event of the form and add a new task to the list
             document.addEventListener("DOMContentLoaded", function() {
+                // By default, submit button is disabled until the user types something in the input field. This is useful for improving the user experience by preventing the user from submitting an empty task.
+                document.querySelector("#submitBtn").disabled = true;
+
+                document.querySelector("#taskInput").onkeyup = () => {
+                    // Adding a condition statement to check if the input field is empty. If it is empty, the submit button will be disabled. If it is not empty, the submit button will be enabled. This is useful for improving the user experience by preventing the user from submitting an empty task.
+                    if (document.querySelector("#taskInput").value.length > 0) {
+                        document.querySelector("#submitBtn").disabled = false;
+                    } else {
+                        document.querySelector("#submitBtn").disabled = true;
+                    }   
+                }
+
                 // Adding a function when the user is typing in the input field. If the user presses the "Enter" key, the form will be submitted and a new task will be added to the list.
                 document.querySelector("form").onsubmit = () => {
                     const taskInput = document.querySelector("#taskInput").value;
-                    console.log(taskInput);
+                    // This line of code will show the input value in the console when the form is submitted. This is useful for debugging purposes to check if the input value is being captured correctly.
+                    //console.log(taskInput);
+
+                    const li = document.createElement("li"); // Create a new <li> element
+                    li.innerHTML = taskInput; // Set the content of the <li> element to the input value
+
+                    document.querySelector("#tasks").append(li); // Append the new <li> element to the <ul> element with the id "tasks"
+
+                    // This line of code will clear the input field after the form is submitted. This is useful for improving the user experience by allowing the user to enter a new task without having to manually clear the input field.
+                    document.querySelector("#taskInput").value = "";
+                    document.querySelector("#submitBtn").disabled = true;
+
 
                     // Stop form from submitting and refreshing the page.
                     return false;
@@ -25,13 +48,10 @@
         <h1>Tasks</h1>
         
         <ul id="tasks">
-            <li>Task 1</li>
-            <li>Task 2</li>
-            <li>Task 3</li>
         </ul>
         <form>
             <input type="text" id="taskInput" placeholder="Enter a new task">
-            <input type="submit" value="Add Task">
+            <input id="submitBtn" type="submit" value="Add Task">
         </form>
         
     </body>
