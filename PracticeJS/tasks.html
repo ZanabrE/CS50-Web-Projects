@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tasks</title>
+
+        <script>
+            // Adding an event listener after a DOM content is loaded to handle the submit event of the form and add a new task to the list
+            document.addEventListener("DOMContentLoaded", function() {
+                // Adding a function when the user is typing in the input field. If the user presses the "Enter" key, the form will be submitted and a new task will be added to the list.
+                document.querySelector("form").onsubmit = () => {
+                    const taskInput = document.querySelector("#taskInput").value;
+                    console.log(taskInput);
+
+                    // Stop form from submitting and refreshing the page.
+                    return false;
+                }
+            });
+
+            
+        </script>
+    </head> 
+    <body>
+        <h1>Tasks</h1>
+        
+        <ul id="tasks">
+            <li>Task 1</li>
+            <li>Task 2</li>
+            <li>Task 3</li>
+        </ul>
+        <form>
+            <input type="text" id="taskInput" placeholder="Enter a new task">
+            <input type="submit" value="Add Task">
+        </form>
+        
+    </body>
+</html>
