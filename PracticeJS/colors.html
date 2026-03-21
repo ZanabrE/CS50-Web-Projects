@@ -9,22 +9,62 @@
             // Adding an event listener to the form to handle the submit event and change the background color of the page to the entered color
             document.addEventListener("DOMContentLoaded", function() {
                 
-                document.querySelector("form").onsubmit = function() {
-                    const color = document.querySelector('#color').value;
-                    document.body.style.backgroundColor = color; // Change the background color of the page to the entered color
+                // Adding query selectors to the buttons to change the background color of the page when clicked
+                /*document.querySelector("#red").addEventListener("click", function() {
+                    document.body.style.backgroundColor = "red";
+                });*/
+
+                // Adding an event listener to the buttons to change the color of the text when clicked
+                /*document.querySelector("#red").onclick = function() {
+                    document.querySelector("#changeColor").style.color = "red";
                 };
+
+                document.querySelector("#blue").onclick = function() {
+                    document.querySelector("#changeColor").style.color = "blue";
+                };
+
+                document.querySelector("#green").onclick = function() {
+                    document.querySelector("#changeColor").style.color = "green";
+                };*/
+
+                //Adding an event listener to select all buttons and change the color of the text to the data-color attribute when clicked
+                /*const buttons = document.querySelectorAll("button[data-color]");
+                buttons.forEach(button => {
+                    button.addEventListener("click", function() {
+                        document.querySelector("#changeColor").style.color = this.getAttribute("data-color");
+                    });
+                });*/
+
+                // Adding an event listener using forEach to select all buttons and change the color of the text to the data-color attribute when clicked
+                /*document.querySelectorAll("button").forEach(button => {
+                    button.onclick = function() {
+                        document.querySelector("#changeColor").style.color = button.dataset.color;
+                    };
+                })*/
+
+                // Adding an event listener to the select element to change the color of the text to the selected color when changed
+                document.querySelector("select").onchange = function() {
+                    document.querySelector("#changeColor").style.color = this.value;
+                };
+
             });
 
             
         </script>
     </head> 
     <body>
-        <h1>Change the background color of the page</h1>
+        <h1 id="changeColor">Change the color of the button when pressed.</h1>
         
-        <form>
-            <input autofocus type="text" id="color" placeholder="Enter a color">
-            <input type="submit" value="Submit">
-        </form>
-        
+        <!-- <button data-color="red">Red</button>
+        <button data-color="green">Green</button>
+        <button data-color="blue">Blue</button> -->
+
+        <select>
+            <option value="">Select a color</option>
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+        </select>
+
     </body>
 </html>
