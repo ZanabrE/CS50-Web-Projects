@@ -8,22 +8,42 @@
         <!--<script src="currency.js"></script>-->
         <script>
             document.addEventListener("DOMContentLoaded", function(){
-                fetch("https://api.exchangerate-api.com/v4/latest/USD")
+                
+                document.querySelector("form").onsubmit = function() {
+
+                    fetch("https://open.er-api.com/v6/latest/USD")
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
+                        // This line of code will show the exchange rate data in the console when the form is submitted. This is useful for debugging purposes to check if the exchange rate data is being fetched correctly.
+                        const currencyInput = document.querySelector("#currencyInput").value.toUpperCase();
+                        const rate = data.rates[currencyInput];
+                        if (rate !== undefined) {
+                            document.querySelector("#result").innerHTML = "1 USD is equal to " + rate.toFixed(2) + " " + currencyInput + ".";
+                        } else{
+                            document.querySelector("#result").innerHTML = "Invalid currency code. Please enter a valid currency code.";
+                        }
+                        
                     });
+
+                    return false; // Prevent the form from submitting and refreshing the page
+                }
 
             });
 
-
+            //https://api.exchangerate-api.com/v4/latest/USD
         </script>
     </head> 
     <body>
         <h1>Currency Converter</h1>
-        <p>This is my first JavaScript code.</p>
-        <input type="number" id="amount" placeholder="Enter amount in USD">
-        <button onclick="convertCurrency()">Convert to EUR</button>
-        <p id="result"></p>
+        <p>This will convert the entered amount to EUR.</p>
+        
+        <form>
+            <input type="text" id="currencyInput" placeholder="Enter amount in USD">
+            <input type="submit" value="Convert">
+        </form>
+
+        <div id="result">
+            
+        </div>
     </body>
 </html>
