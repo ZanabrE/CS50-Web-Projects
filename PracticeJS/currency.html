@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Currency Converter</title>
+
+        <!--<script src="currency.js"></script>-->
+        <script>
+            document.addEventListener("DOMContentLoaded", function(){
+                fetch("https://api.exchangerate-api.com/v4/latest/USD")
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                    });
+
+            });
+
+
+        </script>
+    </head> 
+    <body>
+        <h1>Currency Converter</h1>
+        <p>This is my first JavaScript code.</p>
+        <input type="number" id="amount" placeholder="Enter amount in USD">
+        <button onclick="convertCurrency()">Convert to EUR</button>
+        <p id="result"></p>
+    </body>
+</html>
