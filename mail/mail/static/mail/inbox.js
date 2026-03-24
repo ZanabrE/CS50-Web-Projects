@@ -10,15 +10,20 @@ document.addEventListener('DOMContentLoaded', function() {
         body: document.querySelector('#compose-body').value
       })
     })
-    .then(response => response.json())
-    .then(result => {
-      // Print result
-      console.log(result);
-      load_mailbox('sent');
-    });
+    .then(response => {
+      if (response.ok) {
+        // Only redirect if the email was successfully created (status 201)
+        load_mailbox('sent');
+      } else {
+        // Handle errors (e.g., recipiant doesn't exist)
+        return response.json().then(error => {
+          alert(error.error);
+        });
+      }
+    })
+    .catch(error => console.error('Error:',error));
 
-    return false;
-
+    return false; // Prevent the default form submission behavior
   };
 
   // Use buttons to toggle between views
@@ -51,36 +56,37 @@ function load_mailbox(mailbox) {
   // Using GET method to fetch the emails of the selected mailbox from the server and then display them in the mailbox view
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-  // fetch the emails of the selected mailbox from the server
-  fetch(`/emails/${mailbox}`)
-  .then(response => response.json())
-  .then(emails => {
-    // Loop through emails and create a row for each email
-    emails.forEach(email => {
-      const email_element = document.createElement('div');
-      email_element.className = 'email'; // Add a class for CSS styling
+    // fetch the emails of the selected mailbox from the server
+    fetch(`/emails/${mailbox}`)
+    .then(response => response.json())
+    .then(emails => {
+      // Loop through emails and create a row for each email
+      emails.forEach(email => {
+        const email_element = document.createElement('div');
+        email_element.className = 'email-view'; // Add a class for CSS styling
 
-      //Set background color based on read status
-      email_element.style.backgroundColor = email.read ? '#e5e5e5' : 'white';
-      email_element.style.border = '1px solid black';
-      email_element.style.padding = '10px';
-      email_element.style.margin = '5px 0';
+        //Set background color based on read status
+        email_element.style.backgroundColor = email.read ? '#e5e5e5' : 'white';
+        email_element.style.border = '1px solid black';
+        email_element.style.padding = '10px';
+        email_element.style.margin = '5px 0';
 
-    // Add email content to the email element
-      email_element.innerHTML = `
-        <strong>${email.sender}</strong>
-        <span>${email.subject}</span>
-        <span style="float:right; color:gray;">${email.timestamp}</span>
-        `;
+      // Add email content to the email element
+        email_element.innerHTML = `
+          <strong>${email.sender}</strong>
+          <span>${email.subject}</span>
+          <span style="float:right; color:gray;">${email.timestamp}</span>
+          `;
 
-      // Add click event to view the email (for the next part of the project)
-      email_element.addEventListener('click', () => {
-        console.log('This element has been clicked!');
+        // Add click event to view the email (for the next part of the project)
+        email_element.addEventListener('click', () => {
+          console.log('This element has been clicked!');
+        });
+
+        document.querySelector('#emails-view').appendChild(email_element);
       });
 
-      document.querySelector('#emails-view').appendChild(email_element);
-    });
-
+      email_element.innerHTML = 'Test email content';
   });
 
 }
