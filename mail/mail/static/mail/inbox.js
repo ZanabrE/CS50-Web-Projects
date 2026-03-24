@@ -54,22 +54,27 @@ function load_mailbox(mailbox) {
   document.querySelector('#compose-view').style.display = 'none';
 
   // Using GET method to fetch the emails of the selected mailbox from the server and then display them in the mailbox view
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>
+                                                      <div id="loading">Loading messages...</div>`;
 
     // fetch the emails of the selected mailbox from the server
     fetch(`/emails/${mailbox}`)
     .then(response => response.json())
     .then(emails => {
+      // Remove loading message once data arrives.
+      document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
       // Loop through emails and create a row for each email
       emails.forEach(email => {
         const email_element = document.createElement('div');
-        email_element.className = 'email-view'; // Add a class for CSS styling
+        email_element.className = 'email'; // Add a class for CSS styling
 
         //Set background color based on read status
         email_element.style.backgroundColor = email.read ? '#e5e5e5' : 'white';
         email_element.style.border = '1px solid black';
         email_element.style.padding = '10px';
         email_element.style.margin = '5px 0';
+        email_element.style.cursor = 'pointer';
 
       // Add email content to the email element
         email_element.innerHTML = `
@@ -80,13 +85,13 @@ function load_mailbox(mailbox) {
 
         // Add click event to view the email (for the next part of the project)
         email_element.addEventListener('click', () => {
-          console.log('This element has been clicked!');
+          console.log(`Email ${email.id} clicked!`);
         });
 
-        document.querySelector('#emails-view').appendChild(email_element);
+        document.querySelector('#emails-view').append(email_element);
+
       });
 
-      email_element.innerHTML = 'Test email content';
   });
 
 }

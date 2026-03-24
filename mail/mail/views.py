@@ -82,7 +82,7 @@ def mailbox(request, mailbox):
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
-            user=request.user, sender=request.user
+            user=request.user, sender=request.user 
         )
     elif mailbox == "archive":
         emails = Email.objects.filter(
