@@ -1,9 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Using POST method to send email data to the server and then load the sent mailbox after the email is sent successfully
-  //document.querySelector('#compose-form').onsubmit = function(event) {
-    // Prevent the default form submission behavior
-  
-  // Sellect the form once and store it.
+  // Select the form once and store it.
   const composeForm = document.querySelector('#compose-form');
 
   // Use the 'submit' event listener.
