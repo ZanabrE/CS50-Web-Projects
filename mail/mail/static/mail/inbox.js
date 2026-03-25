@@ -1,7 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Using POST method to send email data to the server and then load the sent mailbox after the email is sent successfully
-  document.querySelector('#compose-form').onsubmit = function() {
+  //document.querySelector('#compose-form').onsubmit = function(event) {
+    // Prevent the default form submission behavior
+  
+  // Sellect the form once and store it.
+  const composeForm = document.querySelector('#compose-form');
 
+  // Use the 'submit' event listener.
+  composeForm.onsubmit = function(event) {
+
+    // THIS MUST BE THE FIRST LINE to stop the '?' and page reload.
+    event.preventDefault();
+
+    // Send email data to the server using the Fetch API
     fetch('/emails', {
       method: 'POST',
       body: JSON.stringify({
@@ -27,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 
   // Use buttons to toggle between views
-  document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
+  document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox')); 
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
@@ -53,45 +64,47 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
-  // Using GET method to fetch the emails of the selected mailbox from the server and then display them in the mailbox view
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>
-                                                      <div id="loading">Loading messages...</div>`;
+  // Clear previous emails and set the header of the mailbox.
+  const emailsView = document.querySelector('#emails-view');
+  emailsView.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-    // fetch the emails of the selected mailbox from the server
-    fetch(`/emails/${mailbox}`)
-    .then(response => response.json())
-    .then(emails => {
-      // Remove loading message once data arrives.
-      document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  // Fetch the latest emails from the API and display them.
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    // Loop through emails and render each one.
+    emails.forEach(email => {
+      const email_div = document.createElement('div');
 
-      // Loop through emails and create a row for each email
-      emails.forEach(email => {
-        const email_element = document.createElement('div');
-        email_element.className = 'email'; // Add a class for CSS styling
+      // Styling for the email box.
+      email_div.style.border = '1px solid black';
+      email_div.style.padding = '10px';
+      email_div.style.margin = '10px 0';
+      email_div.style.display = 'flex';
+      email_div.style.justifyContent = 'space-between';
+      email_div.style.cursor = 'pointer';
 
-        //Set background color based on read status
-        email_element.style.backgroundColor = email.read ? '#e5e5e5' : 'white';
-        email_element.style.border = '1px solid black';
-        email_element.style.padding = '10px';
-        email_element.style.margin = '5px 0';
-        email_element.style.cursor = 'pointer';
+      // Background color based on read/unread status.
+      email_div.style.backgroundColor = email.read ? '#f0f0f0' : 'white';
 
-      // Add email content to the email element
-        email_element.innerHTML = `
+      // Populate email content (Sender, Subject, and Timestamp).
+      email_div.innerHTML = `
+        <div>
           <strong>${email.sender}</strong>
-          <span>${email.subject}</span>
-          <span style="float:right; color:gray;">${email.timestamp}</span>
-          `;
+          <span style="margin-left: 10px;">${email.subject}</span>
+        </div>
+        <div style="color: gray;">${email.timestamp}</div>
+      `;
 
-        // Add click event to view the email (for the next part of the project)
-        email_element.addEventListener('click', () => {
-          console.log(`Email ${email.id} clicked!`);
-        });
-
-        document.querySelector('#emails-view').append(email_element);
-
+      // Add click listener to view the email details.
+      email_div.addEventListener('click', () => {
+        view_email(email.id); // You will implement this next!
       });
 
-  });
+      // Append the email div to the mailbox view.
+      emailsView.append(email_div);
 
+    });
+  })
+  .catch(error => console.error('Error loading mailbox:', error));
 }
