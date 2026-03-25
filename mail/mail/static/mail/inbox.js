@@ -104,3 +104,34 @@ function load_mailbox(mailbox) {
   })
   .catch(error => console.error('Error loading mailbox:', error));
 }
+
+function view_email(id){
+  // Hide other views and show the single email view.
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  const singleEmailView = document.querySelector('#single-email-view');
+  singleEmailView.style.display = 'block';
+
+  // Fetch the email details from the API.
+  fetch(`/emails/${id}`)
+  .then(response => response.json())
+  .then(email => {
+    // Render email details (Sender, Recipients, Subject, Body, Timestamp).
+    singleEmailView.innerHTML = `
+      <div><strong>From:</strong> ${email.sender}</div>
+      <div><strong>To:</strong> ${email.recipients}</div>
+      <div><strong>Subject:</strong> ${email.subject}</div>
+      <div><strong>Timestamp:</strong> ${email.timestamp}</div>
+      <hr>
+      <p>${email.body}</p>
+      `;
+
+      // Mark email as read if it isn't already.
+      if (!email.read) {
+        fetch(`/emails/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({read: true})
+        });
+      }
+  });
+}
