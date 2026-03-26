@@ -59,6 +59,7 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#single-email-view').style.display = 'none';
 
   // Clear previous emails and set the header of the mailbox.
   const emailsView = document.querySelector('#emails-view');
@@ -94,7 +95,7 @@ function load_mailbox(mailbox) {
 
       // Add click listener to view the email details.
       email_div.addEventListener('click', () => {
-        view_email(email.id); // You will implement this next!
+        view_email(email.id, mailbox); // Pass the mailbox to determine if Archive/Unarchive button should be shown.
       });
 
       // Append the email div to the mailbox view.
@@ -105,12 +106,14 @@ function load_mailbox(mailbox) {
   .catch(error => console.error('Error loading mailbox:', error));
 }
 
-function view_email(id){
+function view_email(id, mailbox) { //Adding the mailbox parameter to determine if Archive/Unarchive button should be shown.
   // Hide other views and show the single email view.
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
+  
   const singleEmailView = document.querySelector('#single-email-view');
   singleEmailView.style.display = 'block';
+  singleEmailView.innerHTML = ''; // Clear previous email details.
 
   // Fetch the email details from the API.
   fetch(`/emails/${id}`)
@@ -125,6 +128,36 @@ function view_email(id){
       <hr>
       <p>${email.body}</p>
       `;
+
+      // Add Archive/Unarchive Button (only if not in 'Sent').
+      if (mailbox !== 'sent') {
+        const archiveBtn = document.createElement('button');
+        archiveBtn.innerHTML = email.archived ? "Unarchive" : "Archive";
+        archiveBtn.className = email.archived ? "btn btn-sm btn-success mr-2" : "btn btn-sm btn-outline-danger mr-2";
+
+        archiveBtn.onclick = () => {
+          fetch(`/emails/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({archived: !email.archived})
+          })
+          .then(() => load_mailbox('inbox')); // Refresh inbox after archiving/unarchiving.
+        };
+        singleEmailView.append(archiveBtn);
+      }
+
+      // Create and append the Reply button.
+      const replyBtn = document.createElement('button');
+      replyBtn.innerHTML = "Reply";
+      replyBtn.className = "btn btn-sm btn-outline-primary";
+
+      replyBtn.onclick = () => {
+        compose_email();
+        document.querySelector('#compose-recipients').value = email.sender;
+        document.querySelector('#compose-subject').value = email.subject.startsWith("Re:") ? email.subject : `Re: ${email.subject}`;
+        document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.sender} wrote:\n${email.body}\n\n`;
+      };
+
+      document.querySelector('#single-email-view').append(replyBtn);
 
       // Mark email as read if it isn't already.
       if (!email.read) {
