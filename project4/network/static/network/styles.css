@@ -1,0 +1,13 @@
+.nav-link.btn-outline-light:hover {
+    color: #007bff !important; /* Change this to match your navbar color */
+    background-color: #ffffff !important;
+}
+
+/* Optional: Make the @username also clearly visible */
+.navbar-nav .nav-link.fw-bold {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.navbar-nav .nav-link.fw-bold:hover {
+    color: #ffffff;
+}

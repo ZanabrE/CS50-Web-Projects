@@ -7,45 +7,54 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link href="{% static 'network/styles.css' %}" rel="stylesheet">
     </head>
-    <body>
+    <body class="bg-light">
 
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
             <div class="container">
                 <a class="navbar-brand fw-bold" href="#">Network</a>
+
+                <!-- Toggle navigation -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
             
-                <div>
-                <ul class="navbar-nav mr-auto">
-                    {% if user.is_authenticated %}
+                <div class= "collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item">
-                            <a class="nav-link" href="#"><strong>{{ user.username }}</strong></a>
+                            <a class="nav-link" href="{% url 'index' %}">All Posts</a>
                         </li>
-                    {% endif %}
-                    <li class="nav-item">
-                    <a class="nav-link" href="{% url 'index' %}">All Posts</a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Following</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
-                        </li>
-                    {% endif %}
-                </ul>
+                        
+                        {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Following</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-outline-light btn-sm ms-lg-2 px-3" href="{% url 'logout' %}">Log Out</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-bold ms-lg-3 px-3" href="#">@{{ user.username }}</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-light btn-sm ms-lg-2 px-3" href="{% url 'register' %}">Register</a>
+                            </li>
+                        {% endif %}
+                    </ul>
                 </div>
             </div>
           </nav>
         
-        <div class="body">
-            {% block body %}
-            {% endblock %}
+        <div class="container">
+             <div class="row justify-content-center">
+                <div class="col-md-10 col-lg-8">
+                    {% block body %}
+                    {% endblock %}
+                </div>
+            </div>
         </div>
+
     </body>
 </html>
