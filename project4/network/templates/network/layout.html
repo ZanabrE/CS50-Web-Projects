@@ -51,6 +51,29 @@
              <div class="row justify-content-center">
                 <div class="col-md-10 col-lg-8">
                     {% block body %}
+                        <div id="all-posts">
+                            {% for post in posts %}
+                                <div class="card mb-2 p-3">
+                                    <!-- Username -->
+                                    <h6 class="mb-1">
+                                        <a href="#"><strong>{{ post.user.username }}</strong></a>
+                                    </h6>
+                                    
+                                    <!-- Post Content -->
+                                    <p class="mb-1">{{ post.content }}</p>
+                                    
+                                    <!-- Timestamp -->
+                                    <small class="text-muted">{{ post.timestamp|date:"M d Y, h:i A" }}</small>
+                                    
+                                    <!-- Likes (Placeholder for now) -->
+                                    <div class="mt-2">
+                                        <span>❤️ 0</span>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p>No posts yet.</p>
+                            {% endfor %}
+                        </div>
                     {% endblock %}
                 </div>
             </div>
