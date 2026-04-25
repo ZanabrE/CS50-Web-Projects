@@ -1,12 +1,35 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <div id="new-post-box" class="card p-3 mb-4">
-        <h5>New Post</h5>
-        <form action="#" method="POST">
-            {% csrf_token %}
-            <textarea name="content" class="form-control" rows="3" placeholder="What's on your mind?" required></textarea>
-            <button type="submit" class="btn btn-primary mt-2">Post</button>
-        </form>
+    <h2 class="mb-4">All Posts</h2>
+
+    <!-- New Post Form (only for signed-in users) -->
+    {% if user.is_authenticated %}
+        <div class="card p-3 mb-4 shadow-sm">
+            <h5 class="card-title">New Post</h5>
+            <form action="{% url 'create_post' %}" method="POST">
+                {% csrf_token %}
+                <textarea name="content" class="form-control" rows="3" placeholder="What's on your mind?" required></textarea>
+                <button type="submit" class="btn btn-primary mt-2">Post</button>
+            </form>
+        </div>
+    {% endif %} 
+
+     <!-- All Posts Feed -->
+    <div id="all-posts">
+        {% for post in posts %}
+            <div class="card mb-2 p-3 shadow-sm">
+                <h6 class="mb-1">
+                    <a href="#"><strong>{{ post.user.username }}</strong></a>
+                </h6>
+                <p class="mb-1">{{ post.content }}</p>
+                <small class="text-muted">{{ post.timestamp|date:"M d Y, h:i A" }}</small>
+                <div class="mt-2">
+                    <span>❤️ {{ post.likes.count }}</span>
+                </div>
+            </div>
+        {% empty %}
+            <p>No posts yet.</p>
+        {% endfor %}
     </div>
 {% endblock %}

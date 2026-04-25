@@ -71,7 +71,7 @@ def register(request):
 @login_required
 def create_post(request):
     if request.method == "POST":
-        content = request.POST.get("content")
-        # Save the user post associated with the current user.
-        Post.objects.create(user=request.user, content=content)
+        content = request.POST.get("content", "").strip()
+        if content: # Only save if there is actual text.
+            Post.objects.create(user=request.user, content=content)
         return HttpResponseRedirect(reverse("index"))
