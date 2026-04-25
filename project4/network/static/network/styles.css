@@ -51,6 +51,42 @@ body {
     background-color: #1d4ed8;
 }
 
+/* Rounded Pill Buttons */
+.btn-pill {
+    border-radius: 50px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Following Button Initial State */
+.btn-following {
+    background-color: #ffffff;
+    border: 1px solid #dbdbdb;
+    color: #262626;
+    min-width: 120px;
+}
+
+/* Hide Unfollow text by default */
+.btn-following .unfollow-text {
+    display: none;
+}
+
+/* Hover state: Transform Following -> Unfollow */
+.btn-following:hover {
+    background-color: #fee2e2 !important; /* Soft red background */
+    border-color: #ef4444 !important;
+    color: #dc2626 !important; /* Bold red text */
+}
+
+.btn-following:hover .following-text {
+    display: none;
+}
+
+.btn-following:hover .unfollow-text {
+    display: inline;
+}
+
 /* 5. Responsive Adjustments */
 @media (max-width: 768px) {
     .navbar-nav {
