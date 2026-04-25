@@ -6,24 +6,23 @@ body {
 
 /* 2. Custom Navbar Styling */
 .navbar {
-    background-color: #ffffff !important; /* White background for a clean "Social Media" look */
     border-bottom: 1px solid #e2e8f0;
     transition: all 0.3s ease;
 }
 
 .navbar-brand {
-    color: #0f172a !important; /* Darker text for brand */
+    color: #ffffff !important; /* Darker text for brand */
     letter-spacing: -0.5px;
 }
 
 .nav-link {
-    color: #64748b !important; /* Grayish links */
+    color: #ffffff !important; /* Grayish links */
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
 .nav-link:hover {
-    color: #2563eb !important; /* Primary blue on hover */
+    color: rgba(255, 255, 255, 0.8) !important; /* Slight fade on hover */
 }
 
 /* 3. Refined Post Cards */
