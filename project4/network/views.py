@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
@@ -75,3 +75,39 @@ def create_post(request):
         if content: # Only save if there is actual text.
             Post.objects.create(user=request.user, content=content)
         return HttpResponseRedirect(reverse("index"))
+    
+# Fetching the user's profile.
+def profile(request, username):
+    # Fetch the user whose profile is being viewed.
+    profile_user = get_object_or_404(User, username=username)
+    
+    # Get all posts from this user in reverse chronological order.
+    posts = profile_user.posts.all().order_by("-timestamp")
+    
+    # Check if the logged-in user is already following this person.
+    is_following = False
+    if request.user.is_authenticated:
+        is_following = profile_user.followers.filter(id=request.user.id).exists()
+        
+    return render(request, "network/profile.html", {
+        "profile_user": profile_user,
+        "posts": posts,
+        "is_following": is_following,
+        "follower_count": profile_user.followers.count(),
+        "following_count": profile_user.following.count()
+    })
+    
+# This will implement the follow/unfollow functionality.
+@login_required
+def toggle_follow(request, username):
+    user_to_modify = get_object_or_404(User, username=username)
+    
+    # Prevent users from follwowing themselves.
+    if request.user != user_to_modify:
+        if request.user.following.filter(id=user_to_modify.id).exists():
+            request.user.following.remove(user_to_modify)
+        else:
+            request.user.following.add(user_to_modify)
+    
+    return HttpResponseRedirect(reverse("profile", args=[username]))
+
