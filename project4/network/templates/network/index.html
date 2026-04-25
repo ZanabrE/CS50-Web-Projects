@@ -32,7 +32,7 @@
                         {{ post.user.username|slice:":1"|upper }}
                     </div>
                     <div>
-                        <a href="#" class="h6 font-weight-bold text-dark mb-0 d-block text-decoration-none">@{{ post.user.username }}</a>
+                        <a href="{% url 'profile' post.user.username %}" class="h6 font-weight-bold text-dark mb-0 d-block text-decoration-none">@{{ post.user.username }}</a>
                         <small class="text-muted">{{ post.timestamp|date:"M d, Y · h:i A" }}</small>
                     </div>
                 </div>
