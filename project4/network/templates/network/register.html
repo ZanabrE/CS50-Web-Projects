@@ -1,30 +1,45 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-5">
+                <h2 class="text-center font-weight-bold mb-4">Register</h2>
 
-    <h2>Register</h2>
+                {% if message %}
+                    <div class="alert alert-danger py-2 text-center" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
 
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
+                <form action="{% url 'register' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <input class="form-control bg-light border-0" autofocus type="text" name="username" placeholder="Username">
+                    </div>
+                    <div class="form-group mb-3">
+                        <input class="form-control bg-light border-0" type="email" name="email" placeholder="Email Address">
+                    </div>
+                    <div class="form-group mb-3">
+                        <input class="form-control bg-light border-0" type="password" name="password" placeholder="Password">
+                    </div>
+                    <div class="form-group mb-4">
+                        <input class="form-control bg-light border-0" type="password" name="confirmation" placeholder="Confirm Password">
+                    </div>
+                    <button class="btn btn-primary btn-block shadow-sm py-2 font-weight-bold" type="submit">
+                        Register
+                    </button>
+                </form>
 
-    <form action="{% url 'register' %}" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <input class="form-control" autofocus type="text" name="username" placeholder="Username">
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="text-muted small mb-0">Already have an account?</p>
+                    <a href="{% url 'login' %}">Log In here.</a>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <input class="form-control" type="email" name="email" placeholder="Email Address">
-        </div>
-        <div class="form-group">
-            <input class="form-control" type="password" name="password" placeholder="Password">
-        </div>
-        <div class="form-group">
-            <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
-        </div>
-        <input class="btn btn-primary" type="submit" value="Register">
-    </form>
-
-    Already have an account? <a href="{% url 'login' %}">Log In here.</a>
-
+    </div>
+</div>
 {% endblock %}
