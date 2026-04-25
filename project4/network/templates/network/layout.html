@@ -3,18 +3,20 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Social Network{% endblock %}</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link href="{% static 'network/styles.css' %}" rel="stylesheet">
     </head>
     <body class="bg-light">
 
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4 py-2">
             <div class="container">
-                <a class="navbar-brand fw-bold" href="#">Network</a>
+                <a class="navbar-brand font-weight-bold" href="#">Network</a>
 
                 <!-- Toggle navigation -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             
@@ -26,20 +28,20 @@
                         
                         {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Following</a>
+                                <a class="nav-link px-3" href="#">Following</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-outline-light btn-sm ms-lg-2 px-3" href="{% url 'logout' %}">Log Out</a>
+                            <li class="nav-item ml-lg-2">
+                                <a class="nav-link font-weight-bold px-3" href="#">@{{ user.username }}</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-bold ms-lg-3 px-3" href="#">@{{ user.username }}</a>
+                            <li class="nav-item ml-lg-2">
+                                <a class="btn btn-outline-light btn-sm px-3" href="{% url 'logout' %}">Log Out</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                                <a class="nav-link px-3" href="{% url 'login' %}">Log In</a>
                             </li>
                             <li class="nav-item">
-                                <a class="btn btn-light btn-sm ms-lg-2 px-3" href="{% url 'register' %}">Register</a>
+                                <a class="btn btn-light btn-sm px-4 shadow-sm" href="{% url 'register' %}">Register</a>
                             </li>
                         {% endif %}
                     </ul>
