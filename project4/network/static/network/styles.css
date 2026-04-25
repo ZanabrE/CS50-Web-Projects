@@ -6,23 +6,25 @@ body {
 
 /* 2. Custom Navbar Styling */
 .navbar {
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     transition: all 0.3s ease;
 }
 
-.navbar-brand {
-    color: #ffffff !important; /* Darker text for brand */
-    letter-spacing: -0.5px;
-}
-
+/* Ensure brand and links are white on the blue background */
+.navbar-brand, 
 .nav-link {
-    color: #ffffff !important; /* Grayish links */
-    font-weight: 500;
-    transition: color 0.2s ease;
+    color: #ffffff !important;
 }
 
+/* Hover effect for standard links */
 .nav-link:hover {
-    color: rgba(255, 255, 255, 0.8) !important; /* Slight fade on hover */
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Custom Hover for the "Log Out" button */
+.btn-outline-light:hover {
+    background-color: #ffffff !important;
+    color: #007bff !important; /* Changes text to Bootstrap Blue on hover */
 }
 
 /* 3. Refined Post Cards */
