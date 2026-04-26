@@ -115,7 +115,7 @@ def toggle_follow(request, username):
 @login_required
 def following(request):
     # Fetch posts where the author is in the current user's following list.
-    posts = Post.objects.filter(user_in=request.user.following.all()).order_by("-timestamp")
+    posts = Post.objects.filter(user__in=request.user.following.all()).order_by("-timestamp")
     
     # Paginate and render (reuse your index/all-posts logic).
     return render(request, "network/following.html", {

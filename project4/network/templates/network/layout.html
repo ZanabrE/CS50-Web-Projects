@@ -28,7 +28,7 @@
                         
                         {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link px-3" href="#">Following</a>
+                                <a class="nav-link px-3 {% if request.resolver_match.url_name == 'following' %}active{% endif %}" href="{% url 'following' %}">Following</a>
                             </li>
                             <li class="nav-item ml-lg-2">
                                 <a class="nav-link font-weight-bold px-3" href="{% url 'profile' user.username %}">@{{ user.username }}</a>
