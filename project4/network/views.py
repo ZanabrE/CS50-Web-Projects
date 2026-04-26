@@ -111,3 +111,13 @@ def toggle_follow(request, username):
     
     return HttpResponseRedirect(reverse("profile", args=[username]))
 
+# This will fetch the posts from users that the logged-in user is following.
+@login_required
+def following(request):
+    # Fetch posts where the author is in the current user's following list.
+    posts = Post.objects.filter(user_in=request.user.following.all()).order_by("-timestamp")
+    
+    # Paginate and render (reuse your index/all-posts logic).
+    return render(request, "network/following.html", {
+        "posts": posts
+    })
