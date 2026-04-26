@@ -1,0 +1,66 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h2 class="font-weight-bold mb-4">Following</h2>
+
+    <!-- New Post Form (only for signed-in users) -->
+    {% if user.is_authenticated %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="font-weight-bold mb-3">New Post</h5>
+            <form action="{% url 'create_post' %}" method="POST">
+                {% csrf_token %}
+                <textarea name="content" class="form-control bg-light border-0 mb-3" rows="3" placeholder="What's on your mind?" required style="resize: none; border-radius: 12px;"></textarea>
+                <div class="d-flex justify-content-end">    
+                    <button type="submit" class="btn btn-primary px-4 font-weight-bold shadow-sm" style="border-radius: 20px;">
+                        Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %} 
+
+    <!-- All Posts Feed -->
+    <div id="all-posts">
+        {% for post in posts %}
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-4">
+                <!-- Header: Avatar + Username + Time -->
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary text-white d-flex align-items-center justify-content-center rounded-circle font-weight-bold mr-3" style="width: 42px; height: 42px; font-size: 0.9rem;">
+                        {{ post.user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <a href="{% url 'profile' post.user.username %}" class="h6 font-weight-bold text-dark mb-0 d-block text-decoration-none">@{{ post.user.username }}</a>
+                        <small class="text-muted">{{ post.timestamp|date:"M d, Y · h:i A" }}</small>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <p class="text-secondary" style="font-size: 1.05rem; line-height: 1.5;">
+                    {{ post.content }}
+                </p>
+
+                <!-- Footer: Like Button -->
+                <div class="pt-3 border-top d-flex align-items-center">
+                    <button class="btn btn-link text-muted p-0 text-decoration-none d-flex align-items-center">
+                        <span class="mr-2" style="font-size: 1.2rem;">❤️</span>
+                        <span class="font-weight-bold small">{{ post.likes.count }}</span>
+                    </button>
+                    
+                    {% if user == post.user %}
+                    <button class="btn btn-link text-primary ml-auto p-0 text-decoration-none small font-weight-bold">
+                        Edit
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5">
+            <p class="text-muted">No posts yet. Be the first to share something!</p>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
