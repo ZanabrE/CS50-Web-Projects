@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+import json
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -121,3 +123,20 @@ def following(request):
     return render(request, "network/following.html", {
         "posts": posts
     })
+    
+# Toggles user's ID likes many-to-many.
+@csrf_exempt
+@login_required
+def toggle_like(request, post_id):
+    post = Post.objects.get(pk=post_id)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+    return JsonResponse({
+        "liked": liked,
+        "like_count": post.likes.count()
+    })    
+    

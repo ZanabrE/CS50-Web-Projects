@@ -44,9 +44,9 @@
 
                 <!-- Footer: Like Button -->
                 <div class="pt-3 border-top d-flex align-items-center">
-                    <button class="btn btn-link text-muted p-0 text-decoration-none d-flex align-items-center">
-                        <span class="mr-2" style="font-size: 1.2rem;">❤️</span>
-                        <span class="font-weight-bold small">{{ post.likes.count }}</span>
+                    <button class="btn btn-link text-muted p-0 text-decoration-none d-flex align-items-center" onclick="toggleLike({{ post.id }})">
+                        <span id="heart-{{ post.id }}" class="mr-2" style="font-size: 1.2rem;">&hearts;</span>
+                        <span id="count-{{ post.id }}" class="font-weight-bold small">{{ post.likes.count }}</span>
                     </button>
                     
                     {% if user == post.user %}
