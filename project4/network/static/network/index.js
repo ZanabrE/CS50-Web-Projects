@@ -32,3 +32,35 @@ function toggleLike(postId) {
     })
     .catch(error => console.error('Error:', error));
 }
+
+function editPost(postId) {
+    const contentDiv = document.querySelector(`#content-${postId}`);
+    const originalContent = contentDiv.innerText.trim();
+
+    // Replace content with textarea.
+    contentDiv.innerHTML = `
+        <textarea id="textarea-${postId}" class="form-control mb-2">${originalContent}</textarea>
+        <button class="btn btn-sm btn-success" onclick="savePost(${postId})">Save</button>
+    `;
+}
+
+function savePost(postId) {
+    const newContent = document.querySelector(`#textarea-${postId}`).value;
+
+    fetch(`/edit/${postId}`, {
+        method: 'PUT',
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie('csrftoken') // Safe and reliable
+        },
+        body: JSON.stringify({ content: newContent })
+    })
+    .then(response => {
+        if (response.ok) {
+            const contentDiv = document.querySelector(`#content-${postId}`);
+            contentDiv.innerHTML = `<p class="text-secondary" style="font-size: 1.05rem;">${newContent}</p>`;
+            document.querySelector(`#edit-btn-${postId}`).style.display = 'block';
+        }
+    });
+}
+

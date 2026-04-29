@@ -140,3 +140,17 @@ def toggle_like(request, post_id):
         "like_count": post.likes.count()
     })    
     
+# Edit post content.
+@csrf_exempt
+def edit_post(request, post_id):
+    if request.method == "PUT":
+        data = json.loads(request.body)
+        new_content = data.get("content")
+        
+        post = Post.objects.get(pk=post_id)
+        if request.user == post.user:
+            post.content = new_content
+            post.save()
+            return JsonResponse({"message": "Success"}, status=201)
+    
+    return JsonResponse({"error": "Invalid request"}, status=400)

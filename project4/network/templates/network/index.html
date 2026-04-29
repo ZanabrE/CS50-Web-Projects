@@ -38,10 +38,12 @@
                 </div>
 
                 <!-- Content -->
-                <p class="text-secondary" style="font-size: 1.05rem; line-height: 1.5;">
-                    {{ post.content }}
-                </p>
-
+                <div id="content-{{ post.id }}">
+                    <p class="text-secondary" style="font-size: 1.05rem; line-height: 1.5;">
+                        {{ post.content }}
+                    </p>
+                </div>
+                
                 <!-- Footer: Like Button -->
                 <div class="pt-3 border-top d-flex align-items-center">
                     <button class="btn btn-link text-muted p-0 text-decoration-none d-flex align-items-center" onclick="toggleLike({{ post.id }})">
@@ -50,7 +52,9 @@
                     </button>
                     
                     {% if user == post.user %}
-                    <button class="btn btn-link text-primary ml-auto p-0 text-decoration-none small font-weight-bold">
+                    <button class="btn btn-link text-primary ml-auto p-0 text-decoration-none small font-weight-bold"
+                        onclick="editPost({{ post.id }})"
+                        id="edit-btn-{{ post.id }}">
                         Edit
                     </button>
                     {% endif %}
