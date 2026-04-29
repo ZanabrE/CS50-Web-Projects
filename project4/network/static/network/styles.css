@@ -98,3 +98,11 @@ body {
     }
 }
 
+/* 6. Pagination Styling */
+/* Hover effect for modern buttons */
+.page-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+    background-color: #0056b3 !important; /* Adjust if using custom colors */
+    color: white !important;
+}

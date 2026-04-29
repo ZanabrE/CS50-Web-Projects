@@ -67,24 +67,50 @@
         </div>
         {% endfor %}
 
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
+        <nav aria-label="Page navigation" class="my-5">
+            <ul class="pagination justify-content-center border-0">
+                
+                <!-- Previous Button -->
                 {% if posts.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a>
+                    <li class="page-item mx-1">
+                        <a class="page-link border-0 shadow-sm px-4 text-dark font-weight-bold" 
+                        href="?page={{ posts.previous_page_number }}" 
+                        style="border-radius: 20px; transition: 0.3s;">
+                            &larr; Previous
+                        </a>
                     </li>
                 {% else %}
-                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                    <li class="page-item disabled mx-1">
+                        <span class="page-link border-0 bg-light text-muted px-4" 
+                            style="border-radius: 20px;">
+                            &larr; Previous
+                        </span>
+                    </li>
                 {% endif %}
 
-                <li class="page-item active"><span class="page-link">Page {{ posts.number }}</span></li>
+                <!-- Current Page Indicator (Minimalist) -->
+                <li class="page-item mx-2 d-flex align-items-center">
+                    <span class="text-muted small font-weight-bold">
+                        PAGE {{ posts.number }} <span class="mx-1 text-light">|</span> {{ posts.paginator.num_pages }}
+                    </span>
+                </li>
 
+                <!-- Next Button -->
                 {% if posts.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ posts.next_page_number }}">Next</a>
+                    <li class="page-item mx-1">
+                        <a class="page-link border-0 shadow-sm px-4 bg-primary text-white font-weight-bold" 
+                        href="?page={{ posts.next_page_number }}" 
+                        style="border-radius: 20px; transition: 0.3s;">
+                            Next &rarr;
+                        </a>
                     </li>
                 {% else %}
-                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    <li class="page-item disabled mx-1">
+                        <span class="page-link border-0 bg-light text-muted px-4" 
+                            style="border-radius: 20px;">
+                            Next &rarr;
+                        </span>
+                    </li>
                 {% endif %}
             </ul>
         </nav>
