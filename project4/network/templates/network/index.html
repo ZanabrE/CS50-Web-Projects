@@ -43,7 +43,7 @@
                         {{ post.content }}
                     </p>
                 </div>
-                
+
                 <!-- Footer: Like Button -->
                 <div class="pt-3 border-top d-flex align-items-center">
                     <button class="btn btn-link text-muted p-0 text-decoration-none d-flex align-items-center" onclick="toggleLike({{ post.id }})">
@@ -66,5 +66,28 @@
             <p class="text-muted">No posts yet. Be the first to share something!</p>
         </div>
         {% endfor %}
+
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                <li class="page-item active"><span class="page-link">Page {{ posts.number }}</span></li>
+
+                {% if posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+
     </div>
 {% endblock %}

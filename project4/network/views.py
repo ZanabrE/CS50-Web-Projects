@@ -6,13 +6,22 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .models import User, Post
 
 
 def index(request):
-    # Fetch all posts, ordered by newest first.
-    posts = Post.objects.all().order_by("-timestamp")
+    # Fetch all posts in reverse chronological order.
+    all_posts = Post.objects.all().order_by("-timestamp")
+    
+    # Initialize Paginator with 10 posts per page.
+    paginator = Paginator(all_posts, 10)
+    
+    # Get the page number from the URL request (default is page 1).
+    page_number = request.GET.get("page")
+    posts = paginator.get_page(page_number)
+    
     return render(request, "network/index.html", {
         "posts": posts
     })
