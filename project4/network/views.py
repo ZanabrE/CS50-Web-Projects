@@ -134,7 +134,6 @@ def following(request):
     })
     
 # Toggles user's ID likes many-to-many.
-@csrf_exempt
 @login_required
 def toggle_like(request, post_id):
     post = Post.objects.get(pk=post_id)
