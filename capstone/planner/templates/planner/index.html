@@ -1,0 +1,76 @@
+{% extends "planner/layout.html" %}
+{% load static %}
+
+{% block title %}Dashboard | Smart Meal Planner{% endblock %}
+
+{% block body %}
+<div class="grid">
+    
+    <!-- LEFT SIDEBAR: Live Real-Time Nutritional Target Trackers -->
+    <aside id="macro-summary-panel">
+        <article>
+            <h5>Daily Progress Overview</h5>
+            <label for="calories-progress">Calories Target (2000 kcal)</label>
+            <progress id="calories-progress" value="0" max="2000"></progress>
+            
+            <label for="protein-progress">Protein Target (150g)</label>
+            <progress id="protein-progress" value="0" max="150"></progress>
+            
+            <div id="recipe-pool">
+                <h6>Available Recipes</h6>
+                <!-- Sample Draggable Card Component -->
+                <div class="recipe-card" draggable="true" data-recipe-id="12">
+                    <strong>Protein Oatmeal</strong>
+                    <small>Cals: 350 | P: 25g</small>
+                </div>
+            </div>
+        </article>
+    </aside>
+
+    <!-- MAIN BODY SECTION: 7-Day Planning Layout Matrix -->
+    <section id="calendar-workspace" style="flex: 3;">
+        <h2>Weekly Calendar Matrix</h2>
+        <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem;">
+            
+            <!-- Standard Day Column Grid Template Item -->
+            <div class="calendar-day-column" data-day-code="MON">
+                <h6>Monday</h6>
+                
+                <!-- Droppable Slots -->
+                <div class="meal-slot" data-meal-type="Breakfast">
+                    <small class="slot-label">Breakfast</small>
+                    <div class="slot-occupied-zone"></div>
+                </div>
+                
+                <div class="meal-slot" data-meal-type="Lunch">
+                    <small class="slot-label">Lunch</small>
+                    <div class="slot-occupied-zone"></div>
+                </div>
+                
+                <div class="meal-slot" data-meal-type="Dinner">
+                    <small class="slot-label">Dinner</small>
+                    <div class="slot-occupied-zone"></div>
+                </div>
+            </div>
+            
+            <!-- JavaScript generates remaining Tuesday-Sunday structural objects dynamically or via simple server iteration -->
+
+        </div>
+    </section>
+
+</div>
+
+<!-- MODAL OVERLAY: Optimization Suggester Results Zone -->
+<dialog id="optimization-modal">
+    <article>
+        <h3>Pantry Optimization Suggestions</h3>
+        <p>These recipes maximize ingredients in your pantry nearing expiration:</p>
+        <ul id="optimization-results-list">
+            <!-- Asynchronous list insertions go here -->
+        </ul>
+        <footer>
+            <a href="#" role="button" class="secondary" id="close-modal-btn">Close Matrix</a>
+        </footer>
+    </article>
+</dialog>
+{% endblock %}
