@@ -69,27 +69,8 @@ optimization backend and an interactive frontend:
 
 ## Installation and Execution Instructions
 
-**1. Clone this repository locally**
-
-- Open a terminal shell and clone the codebase to your local directory:
-
-**bash**
-- `git clone <paste-your-repository-url-here>`
-- `cd <your-cloned-folder-name>`
-
-
-**2. Initialize a clean Python virtual environment**
-
-- Create a dedicated space to safely store project dependencies away from system files:
-
-**bash**
-- `python -m venv env`
-
-
-2. Initialize a clean Python virtual environment: `python -m venv env`
-3. Activate the environment and install assets: `pip install -r requirements.txt`
-4. Execute core database schema creation: `python manage.py migrate`
-5. Launch the backend local instance: `python manage.py runserver`
+### Prerequisites
+Ensure you have Python 3.x and `pip` installed on your local machine.
 
 ## Project Setup Instructions
 
