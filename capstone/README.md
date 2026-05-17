@@ -76,17 +76,62 @@ Ensure you have Python 3.x and `pip` installed on your local machine.
 
 Follow these steps to set up and initialize the Django project locally.
 
+### 1. Initialize Your Project Directory
+Create a dedicated folder for your project and navigate inside it:
+```bash
+mkdir my_django_project
+cd my_django_project
+```
 
-| Step | Description | Command |
-| :--- | :--- | :--- |
-| **1a** | Set up a virtual environment | `python -m venv .venv` |
-| **1b** | **Activate (macOS / Linux)** | `source .venv/bin/activate` |
-| | **Activate (Windows Command Prompt)** | `.venv\Scripts\activate.bat` |
-| | **Activate (Windows PowerShell)** | `.venv\Scripts\Activate.ps1` |
-| **2a** | Install Django | `python -m pip install django` |
-| **2b** | Pin your dependencies | `python -m pip freeze > requirements.txt` |
-| **3** | Set up a Django project | `django-admin startproject <projectname>` |
-| **4** | Start a Django app | `python manage.py startapp <appname>` |
+### 2. Set Up a Virtual Environment
+Isolate your project dependencies from your global system environment:
 
-> [!NOTE]  
-> Replace `<projectname>` and `<appname>` with your actual project and application names.
+* **macOS / Linux**:
+  ```bash
+  python3 -m venv <my-project-name>
+  source <my-project-name>/bin/activate
+  ```
+* **Windows**:
+  ```bash
+  python -m venv <my-project-name>
+  <my-project-name>\Scripts\activate
+  ```
+
+### 3. Install Django
+Upgrade `pip` and install the Django package:
+```bash
+python -m pip install --upgrade pip
+python -m pip install django
+```
+
+### 4. Create the Django Project
+Generate the boilerplate configuration files. The trailing dot (`.`) prevents an extra nested root folder:
+```bash
+django-admin startproject config .
+```
+
+### 5. Run Initial Database Migrations
+Initialize the default SQLite database tables:
+```bash
+python manage.py migrate
+```
+
+### 6. Start the Development Server
+Launch Django's built-in local web server:
+```bash
+python manage.py runserver
+```
+*Navigate to `http://127.0.0.1:8000` in your browser to confirm it works.*
+
+### 7. Pin Project Dependencies
+Save your installed packages to a text file for future reference:
+```bash
+python -m pip freeze > requirements.txt
+```
+
+### 8. Create a New App
+Generate your first modular app feature:
+```bash
+python manage.py startapp my_app
+```
+*Note: Remember to add `'my_app'` to `INSTALLED_APPS` inside `config/settings.py`.*
