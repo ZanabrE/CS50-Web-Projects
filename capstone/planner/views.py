@@ -14,7 +14,7 @@ def index(request):
 # 1. User authentication controllers
 def register_view(request):
     """Handles new user account registration"""
-    if reuqest.method == "POST":
+    if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
