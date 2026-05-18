@@ -26,7 +26,7 @@ def register_view(request):
 
 def login_view(request):
     """Handles secure session authentication for returning users"""
-    if reuqest.method == "POST":
+    if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
@@ -106,3 +106,69 @@ def dashboard_view(request):
         }
         
         return render(request, "index.html", context)
+    
+@login_required
+def api_add_pantry_item(request):
+    """Asysnchronously adds a new item to the user's pantry via a JavaScript POST payload."""
+    if request.method == "POST":
+        import json
+        try:
+            data = json.loads(request.body)
+            ingredient_id = data.get("ingredient_id")
+            quantity = Decimal(str(data.get("quantity", 0.01)))
+            unit = data.get("unit","grams")
+            expiration_date = data.get("expiration_date")
+            
+            ingredient = Ingredient.objects.get(id=ingredient_id)
+            
+            item = PantryItem.objects.create(
+                user=request.user,
+                ingredient=ingredient,
+                quantity=quantity,
+                unit=unit,
+                expiration_date=expiration_date
+            )
+            return JsonResponse({
+                    "status": "success",
+                    "item_id": item.id,
+                    "message": f"Added {ingredient.name} successfully."
+                }, status=201)
+        except (Ingredient.DoesNotExist, Exception) as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+@login_required
+def api_delete_pantry_item(request, item_id):
+    """Asynchronously deletes an item from the user's pantry via a JavaScript DELETE request."""
+    if request.method == "DELETE":
+        try:
+            item = PantryItem.objects.get(id=item_id, user=request.user)
+            item.delete()
+            return JsonResponse({"status": "success", "message": "Item removed from inventory."})
+        except PantryItem.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Item not found."}, status=404)
+    
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+@login_required
+def api_move_meal_plan(request):
+    """Updates backend calendar dates asynchronously during frontend drag-and-drop operations."""
+    if request.method == "PUT":
+        import json
+        try:
+            data = json.loads(request.body)
+            plan_id = data.get("plan_id")
+            new_date = data.get("new_date")
+            
+            plan = MealPlan.objects.get(id=plan_id, user=request.user)
+            plan.date = new_date
+            plan.save()
+            
+            return JsonResponse({"status": "success", "message": "Calendar updated successfully."})
+        except MealPlan.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Meal plan not found."}, status=404)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
