@@ -17,22 +17,31 @@
     <!-- Setup standard global CSRF security tokane for JavaScript Fetch access -->
     <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 
-    <!-- Navigation bar -->
-    <nav class="container-fluid">
-        <ul>
-            <li><strong>&#x1F34F; Wasteless Planner</strong></li>
-        </ul>
-        <ul>
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#" id="run-optimizer-btn" class="contrast">Run Optimizer</a></li>
-        </ul>
+    <!-- Navigation Bar Wrapper -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">&#x1F34F; Wasteless Planner</a>
+            <div class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    <a class="nav-link btn btn-success text-white px-3 mx-2" href="#" id="run-optimizer-btn">Run Optimizer</a>
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                {% endif %}
+            </div>
+        </div>
     </nav>
 
-    <main class="container-fluid">
+    <main class="container my-4">
         {% block content %}
         {% endblock %}
     </main>
 
+    <!-- Bootstrap 5 Bundle with Popper JS -->
+    <script src="https://jsdelivr.net" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
     <!-- Core interactive client script -->
     <script src="{% static 'planner/js/calendar.js' %}"></script>
 </body>
