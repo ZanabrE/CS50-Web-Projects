@@ -64,13 +64,13 @@ cd my_django_project
 Isolate your project dependencies from your global system environment:
 *   **macOS / Linux:**
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate
+    python3 -m venv my_project_env
+    source my_project_env/bin/activate
     ```
 *   **Windows (Command Prompt):**
     ```bash
-    python -m venv venv
-    venv\Scripts\activate
+    python -m venv my_project_env
+    my_project_env\Scripts\
     ```
 
 ### 3. Install Django
