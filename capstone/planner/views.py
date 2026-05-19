@@ -92,20 +92,20 @@ def dashboard_view(request):
             recommended_recipes.append({
                 "recipe": recipe,
                 "match_percentage": match_percentage,
-                "missing_count": total_ingredients_count - matched_ingredients_count
+                "missing_count": total_ingredients_count - matched_ingredients
             })
             
-        # Sort recommendations: highest matching percentages first
-        recommended_recipes.sort(key=lambda x: x["match_percentage"], reverse=True)
+    # Sort recommendations: highest matching percentages first
+    recommended_recipes.sort(key=lambda x: x["match_percentage"], reverse=True)
         
-        context = {
-            "pantry_items": pantry_items,
-            "expiring_items": expiring_items,
-            "recommended_recipes": recommended_recipes[:6],
-            "today": today
-        }
+    context = {
+        "pantry_items": pantry_items,
+        "expiring_items": expiring_items,
+        "recommended_recipes": recommended_recipes[:6],
+        "today": today
+    }
         
-        return render(request, "index.html", context)
+    return render(request, "planner/index.html", context) 
     
 @login_required
 def api_add_pantry_item(request):
