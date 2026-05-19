@@ -1,5 +1,4 @@
 {% extends "planner/layout.html" %}
-{% load static %}
 
 {% block title %}Dashboard | Smart Meal Planner{% endblock %}
 
@@ -7,70 +6,100 @@
 <div class="grid">
     
     <!-- LEFT SIDEBAR: Live Real-Time Nutritional Target Trackers -->
-    <aside id="macro-summary-panel">
-        <article>
-            <h5>Daily Progress Overview</h5>
-            <label for="calories-progress">Calories Target (2000 kcal)</label>
-            <progress id="calories-progress" value="0" max="2000"></progress>
+    <aside class="col-md-4 col-lg-3 mb-4" id="macro-summary-panel">
+        <div class="card p-3 shadow-sm mb-3">
+            <h5 class="card-title fw-bold">Daily Progress Overview</h5>
             
-            <label for="protein-progress">Protein Target (150g)</label>
-            <progress id="protein-progress" value="0" max="150"></progress>
-            
-            <div id="recipe-pool">
-                <h6>Available Recipes</h6>
-                <!-- Sample Draggable Card Component -->
-                <div class="recipe-card" draggable="true" data-recipe-id="12">
-                    <strong>Protein Oatmeal</strong>
-                    <small>Cals: 350 | P: 25g</small>
-                </div>
+            <div class="mb-2">
+                <label for="calories-progress" class="form-label mb-1 small text-muted">Calories Target (2000 kcal)</label>
+                <progress id="calories-progress" class="w-100" value="0" max="2000"></progress>
             </div>
-        </article>
+
+            <div class="mb-1">
+                <label for="protein-progress" class="form-label mb-1 small text-muted">Protein Target (150g)</label>
+                <progress id="protein-progress" class="w-100" value="0" max="150"></progress>
+            </div>
+        </div>
+
+        <!-- DYNAMIC RECIPE POOL: Renders your custom algorithm calculations -->
+        <div class="card p-3 shadow-sm" id="recipe-pool">
+            <h6 class="border-bottom pb-2 fw-bold text-secondary">Available Recipes</h6>
+            {% if recommended_recipes %}
+                {% for item in recommended_recipes %}
+                    <!-- Draggable Card Component hooked to calendar.js listeners -->
+                    <div class="recipe-card p-2 mb-2 border rounded bg-light" draggable="true" data-recipe-id="{{ item.recipe.id }}" style="cursor: grab;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <strong class="text-dark small">{{ item.recipe.title }}</strong>
+                            <span class="badge bg-success small">{{ item.match_percentage }}%</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                            <span>Missing items: {{ item.missing_count }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted small text-center my-3">No recipe matches found (Min. 25% match required).</p>
+            {% endif %}
+        </div>
     </aside>
 
     <!-- MAIN BODY SECTION: 7-Day Planning Layout Matrix -->
-    <section id="calendar-workspace" style="flex: 3;">
-        <h2>Weekly Calendar Matrix</h2>
-        <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem;">
-            
-            <!-- Standard Day Column Grid Template Item -->
-            <div class="calendar-day-column" data-day-code="MON">
-                <h6>Monday</h6>
+    <section class="col-md-8 col-lg-9" id="calendar-workspace">
+        <div class="card p-3 shadow-sm">
+            <h2 class="h5 fw-bold mb-3 text-secondary">Weekly Calendar Matrix</h2>
+            <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem;">
                 
-                <!-- Droppable Slots -->
-                <div class="meal-slot" data-meal-type="Breakfast">
-                    <small class="slot-label">Breakfast</small>
-                    <div class="slot-occupied-zone"></div>
+                <!-- Standard Day Column Grid Template Item for Monday -->
+                <div class="calendar-day-column border rounded p-2 bg-white" data-day-code="MON">
+                    <h6 class="text-center text-primary border-bottom pb-1fw-bold">Monday</h6>
+                    
+                    <!-- Droppable Slots managed by calendar.js -->
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Breakfast" style="min-height: 75px;">
+                        <small class="slot-label text-muted d-block fw-bold mb-1" style="font-size: 0.65rem;">BREAKFAST</small>
+                        <div class="slot-occupied-zone"></div>
+                    </div>
+                    
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Lunch" style="min-height: 75px;">
+                        <small class="slot-label text-muted d-block fw-bold mb-1" style="font-size: 0.65rem;">LUNCH</small>
+                        <div class="slot-occupied-zone"></div>
+                    </div>
+                    
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Dinner" style="min-height: 75px;">
+                        <small class="slot-label text-muted d-block fw-bold mb-1" style="font-size: 0.65rem;">DINNER</small>
+                        <div class="slot-occupied-zone"></div>
+                    </div>
                 </div>
-                
-                <div class="meal-slot" data-meal-type="Lunch">
-                    <small class="slot-label">Lunch</small>
-                    <div class="slot-occupied-zone"></div>
-                </div>
-                
-                <div class="meal-slot" data-meal-type="Dinner">
-                    <small class="slot-label">Dinner</small>
-                    <div class="slot-occupied-zone"></div>
-                </div>
-            </div>
-            
-            <!-- JavaScript generates remaining Tuesday-Sunday structural objects dynamically or via simple server iteration -->
 
+                <!-- Note: Remaining days are populated dynamically via your calendar.js implementation -->
+
+            </div>
         </div>
     </section>
 
 </div>
 
-<!-- MODAL OVERLAY: Optimization Suggester Results Zone -->
-<dialog id="optimization-modal">
+<!-- MODAL OVERLAY: Optimization Suggester Results Zone (Expiring Pantry Items) -->
+<dialog id="optimization-modal" class="border-0 rounded p-4 shadow" style="max-width: 500px; width: 90%;">
     <article>
-        <h3>Pantry Optimization Suggestions</h3>
-        <p>These recipes maximize ingredients in your pantry nearing expiration:</p>
-        <ul id="optimization-results-list">
-            <!-- Asynchronous list insertions go here -->
+        <h3 class="text-danger h5 fw-bold mb-2">&#9888; Food Waste Optimization</h3>
+        <p class="text-muted small mb-3">The following items are expiring within 3 days. Move matching recipes to your calendar matrix to utilize them:</p>
+        
+        <ul class="list-group mb-3" id="optimization-results-list">
+            {% if expiring_items %}
+                {% for item in expiring_items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center small py-2">
+                        <span><strong>{{ item.ingredient.name }}</strong> ({{ item.quantity }} {{ item.unit }})</span>
+                        <span class="badge bg-danger">Expires soon</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item text-muted text-center small py-3">Your pantry inventory is clear of short-term expirations!</li>
+            {% endif %}
         </ul>
-        <footer>
-            <a href="#" role="button" class="secondary" id="close-modal-btn">Close Matrix</a>
-        </footer>
+        
+        <div class="text-end">
+            <button type="button" class="btn btn-secondary btn-sm" id="close-modal-btn">Close Matrix</button>
+        </div>
     </article>
 </dialog>
 {% endblock %}
