@@ -34,6 +34,10 @@ def login_view(request):
             return redirect("dashboard")
     else:
         form = AuthenticationForm()
+        # Add Bootstrap styling class directly to fields dynamically
+        for field in form.fields.values():
+            field.widget.attrs.update({'class': 'form-contro'}) 
+            
     return render(request, "planner/login.html", {"form": form})
 
 def logout_view(request):
