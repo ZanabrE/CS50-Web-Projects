@@ -1,0 +1,48 @@
+{% extends "planner/layout.html" %}
+
+{% block title %}Register - Smart Meal Planner{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0 p-4">
+                <h2 class="text-center mb-4 font-weight-bold text-primary">Create an Account</h2>
+
+                <!-- Action points directly to the register path in urls.py -->
+                <form action="{% url 'register' %}" method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Automatically loops and renders the UserCreationForm elements -->
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label}}" class="form-label font-weight-bold">{{ field.label }}</label>
+                            {{ field }}
+
+                            <!-- Renders context-aware validation error queues if passwords don't match -->
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ field.errors|striptags }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Displays default Django password requirements help text -->
+                            {% if field.help_text %}
+                                <div class="form-text text-muted small mt-1">
+                                    {{ field.help_text|safe }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Register</button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="mb-0 text-muted">Already have an account? <a href="{% url 'login' %}" class="text-decoration-none font-weight-bold">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
