@@ -22,6 +22,13 @@ def register_view(request):
             return redirect("dashboard")
     else:
         form = UserCreationForm()
+    
+    # Add Bootstrap styling class directly to fields dynamically
+    for field in form.fields.values():
+        field.widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': ' '
+        })
     return render(request, "planner/register.html", {"form": form})
 
 def login_view(request):
