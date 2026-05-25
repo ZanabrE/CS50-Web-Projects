@@ -169,17 +169,28 @@ def api_move_meal_plan(request):
         import json
         try:
             data = json.loads(request.body)
-            plan_id = data.get("plan_id")
-            new_date = data.get("new_date")
+            recipe_id = data.get("plan_id")         # Coming from data-recipe-id in the JS.
+            day_code = data.get("new_date")         # e.g., "MON", "TUE", etc.
+            meal_type = data.get("meal_type")       # e.g., "breakfast", "lunch", "dinner"
             
-            plan = MealPlan.objects.get(id=plan_id, user=request.user)
-            plan.date = new_date
-            plan.save()
+            # 1. Fetch the recipe being dragged.
+            try:
+                recipe = Recipe.objects.get(id=recipe_id)
+            except Recipe.DoesNotExist:
+                return JsonResponse({"status": "error", "message": "Recipe not found."}, status=404)
             
-            return JsonResponse({"status": "success", "message": "Calendar updated successfully."})
-        except MealPlan.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Meal plan not found."}, status=404)
+            # 2. Updated or create the meal plan entry in your calendar matrix
+            # update_or_create overrides the slot if a user drags a new meal onto it.
+            plan, created = MealPlan.objects.update_or_create(
+                user=request.user,
+                day_code=day_code,      # Check your MealPlan model: change to 'date' if your model uses date fields!
+                meal_type=meal_type,
+                defaults={"recipe": recipe}
+            )
+            
+            return JsonResponse({"status": "success", "message": f"{recipe.title} scheduled successfully."})
+            
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     
-    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405) 
