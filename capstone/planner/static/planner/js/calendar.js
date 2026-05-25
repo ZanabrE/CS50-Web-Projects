@@ -1,17 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
     const recipeCards = document.querySelectorAll(".recipe-card");
     const mealSlots = document.querySelectorAll(".meal-slot");
-    const csrfToken = document.getElementById("csrf-token")?.value;
+
+
+    // Fallback helper to fetch CRSF token from cookies if DOM element is missing (e.g., during testing or template changes)
+    const getCsrfToken = () => {
+        const tokenFromDom = document.getElementById("csrf-token")?.value;
+        if (tokenFromDom) return tokenFromDom;
+
+        return document.cookie.split(';')
+            .map(row => row.trim()) // clean up leading/trailing spaces
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    }
+        
 
     // Initialize HTML5 Drag Event Listeners
     recipeCards.forEach(card => {
         card.addEventListener("dragstart", (e) => {
-            e.dataTransfer.setData("text/plain", card.dataset.recipeId);
-            card.classList.add("dragging");
+            e.dataTransfer.setData("text/plain", e.currentTarget.dataset.recipeId);
+            e.currentTarget.classList.add("dragging");
         });
 
-        card.addEventListener("dragend", () => {
-            card.classList.remove("dragging");
+        card.addEventListener("dragend", (e) => {
+            e.currentTarget.classList.remove("dragging");
         });
     });
 
@@ -33,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const recipeId = e.dataTransfer.getData("text/plain");
             const targetDay = slot.closest(".calendar-day-column").dataset.dayCode;
             const mealType = slot.dataset.mealType;
+            const csrfToken = getCsrfToken();
 
             // Trigger Single Page Background Database Update
             if (recipeId && targetDay && csrfToken) {
@@ -57,14 +70,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         const originCard = document.querySelector(`[data-recipe-id="${recipeId}"]`);
                         if (originCard) {
                             const occupiedZone = slot.querySelector(".slot-occupied-zone");
-                            occupiedZone.innerHTML = `<span class="badge bg-primary w-100">${originCard.querySelector('strong').innerText}</span>`;
+                            const recipeTitle = originCard.querySelector('strong').innerText;
+                            
+                            // Render clean inside your template's layout space
+                            occupiedZone.innerHTML = `<span class="badge bg-primary w-100 py-2 text-wrap">${recipeTitle}</span>`;
                         }
                     } else {
-                        console.error("Database sync failed:", data.message);
+                        console.error("Database sync failed:", data.message || "Unknown error");
                     }
                 } catch (error) {
                     console.error("Network interface error:", error);
                 }
+            } else {
+                console.warn("Drag dropped, but validation failed. Details:", { recipeId, targetDay, hasToken: !!csrfToken });
             }
         });
     });

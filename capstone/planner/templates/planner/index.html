@@ -3,6 +3,7 @@
 {% block title %}Dashboard | Smart Meal Planner{% endblock %}
 
 {% block body %}
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
 <div class="grid">
     
     <!-- LEFT SIDEBAR: Live Real-Time Nutritional Target Trackers -->

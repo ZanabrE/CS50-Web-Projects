@@ -24,7 +24,7 @@
 }
 
 /* JavaScript toggles this class during active drag-and-drop hover actions */
-.meal-slot.drag-hover-active {
+.meal-slot.drag-hover {
     background: #e0f0ff;
     border-color: var(--primary);
 }
