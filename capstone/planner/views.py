@@ -67,7 +67,20 @@ def dashboard_view(request):
     pantry_items = PantryItem.objects.filter(user=user).select_related('ingredient')
     
     # Identify critical items expiring within the next 3 days
-    expiring_items = [item for item in pantry_items if item.days_until_expiration() <= 3]
+    expiring_items = []
+    seen_ingredients = set()
+
+    for item in pantry_items:
+        # Safely handle potential model method errors
+        try:
+            days_left = item.days_until_expiration()
+        except:
+            days_left = 99
+        
+        if days_left <= 3:
+            if item.ingredient.id not in seen_ingredients:
+                expiring_items.append(item)
+                seen_ingredients.add(item.ingredient.id)
     
     # Build a flattered dictionary mapping avaiable ingredients to their total quantities
     user_stock = {}
@@ -109,11 +122,26 @@ def dashboard_view(request):
     # Sort recommendations: highest matching percentages first
     recommended_recipes.sort(key=lambda x: x["match_percentage"], reverse=True)
         
+    calendar_days = [
+        {"code": "MON", "name": "Monday"},
+        {"code": "TUE", "name": "Tuesday"},
+        {"code": "WED", "name": "Wednesday"},
+        {"code": "THU", "name": "Thursday"},
+        {"code": "FRI", "name": "Friday"},
+        {"code": "SAT", "name": "Saturday"},
+        {"code": "SUN", "name": "Sunday"},
+    ]
+
+    # Fetch existing meals already saved by this user
+    saved_meals = MealPlan.objects.filter(user=user).select_related('recipe')
+
     context = {
         "pantry_items": pantry_items,
         "expiring_items": expiring_items,
         "recommended_recipes": recommended_recipes[:6],
-        "today": today
+        "today": today,
+        "calendar_days": calendar_days,  
+        "saved_meals": saved_meals,      
     }
         
     return render(request, "planner/index.html", context) 
@@ -170,20 +198,33 @@ def api_move_meal_plan(request):
         try:
             data = json.loads(request.body)
             recipe_id = data.get("plan_id")         # Coming from data-recipe-id in the JS.
-            day_code = data.get("new_date")         # e.g., "MON", "TUE", etc.
+            target_date = data.get("new_date")      # e.g., "MON", "TUE", etc.
             meal_type = data.get("meal_type")       # e.g., "breakfast", "lunch", "dinner"
             
-            # 1. Fetch the recipe being dragged.
+            # 1. Map frontend day codes to clean database date strings for this current week
+            today = timezone.now().date()
+            start_of_week = today - timedelta(days=today.weekday()) # Finds Monday
+            
+            day_offsets = {
+                "MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6
+            }
+            
+            if day_code in day_offsets:
+                target_date = start_of_week + timedelta(days=day_offsets[day_code])
+            else:
+                target_date = today # Fallback safety measure
+                
+            # 2. Fetch the recipe being dragged.
             try:
                 recipe = Recipe.objects.get(id=recipe_id)
             except Recipe.DoesNotExist:
                 return JsonResponse({"status": "error", "message": "Recipe not found."}, status=404)
             
-            # 2. Updated or create the meal plan entry in your calendar matrix
+            # 3. Updated or create the meal plan entry in your calendar matrix
             # update_or_create overrides the slot if a user drags a new meal onto it.
             plan, created = MealPlan.objects.update_or_create(
                 user=request.user,
-                day_code=day_code,      # Check your MealPlan model: change to 'date' if your model uses date fields!
+                date=target_date,      # Check your MealPlan model: change to 'date' if your model uses date fields!
                 meal_type=meal_type,
                 defaults={"recipe": recipe}
             )
