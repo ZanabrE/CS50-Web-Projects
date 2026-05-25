@@ -18,12 +18,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize HTML5 Drag Event Listeners
     recipeCards.forEach(card => {
         card.addEventListener("dragstart", (e) => {
-            e.dataTransfer.setData("text/plain", e.currentTarget.dataset.recipeId);
-            e.currentTarget.classList.add("dragging");
+            const targetCard = e.target.closest(".recipe-card");
+            if (targetCard) {
+                e.dataTransfer.setData("text/plain", e.currentTarget.dataset.recipeId);
+                e.currentTarget.classList.add("dragging");
+            }
         });
 
         card.addEventListener("dragend", (e) => {
-            e.currentTarget.classList.remove("dragging");
+            const targetCard = e.target.closest(".recipe-card");
+            if (targetCard) {
+                e.currentTarget.classList.remove("dragging");
+            }
         });
     });
 

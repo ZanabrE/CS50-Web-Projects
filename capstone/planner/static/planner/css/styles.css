@@ -35,3 +35,8 @@
     color: #888;
     text-transform: uppercase;
 }
+
+/* Prevents child elements inside the slot from breaking dragover track loops */
+.meal-slot * {
+    pointer-events: none;
+}
