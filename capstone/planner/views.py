@@ -151,7 +151,7 @@ def dashboard_view(request):
     # Map calendar datetime indices into standard layout codes
     day_map = {0: "MON", 1: "TUE", 2: "WED", 3: "THU", 4: "FRI", 5: "SAT", 6: "SUN"}
     for plan in saved_meals:
-        plan.day_code = day_map.get(plan.date.weekday(), "MON")
+        plan.date_code = day_map.get(plan.date.weekday(), "MON")
 
     context = {
         "pantry_items": pantry_items,
