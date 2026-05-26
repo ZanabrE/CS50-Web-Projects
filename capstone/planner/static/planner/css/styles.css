@@ -2,22 +2,24 @@
    1. PREMIUM CONTEMPORARY BACKGROUND ENGINE (GLASSMORPHISM STYLE)
    ========================================================================= */
 body {
-    /* Rich, smooth modern gradient that completely eliminates the plain white look */
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 50%, #d5dae6 100%);
-    background-attachment: fixed; /* Keeps the gradient pinned while you scroll the matrix */
-    min-height: 100vh;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #2d3748;
+    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%) !important;
+    background-attachment: fixed;
+    color: #0F172A;
+}
+
+.navbar {
+    background-color: #1E293B !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.navbar .nav-link, .navbar .navbar-brand {
+    color: #F8FAFC !important;
 }
 
 /* Semi-transparent "Glass" Panel Floating Effect for Dashboard Sections */
 .card {
     background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.5) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
 }
 
 /* Make individual day columns float cleanly over the base background canvas */
@@ -54,8 +56,8 @@ body {
 }
 
 .meal-slot.drag-hover {
-    background-color: #e6f4ff !important;
-    border-color: #3182ce !important;
+    background-color: #E0F2FE !important;
+    border-color: #38BDF8 !important;
 }
 
 
