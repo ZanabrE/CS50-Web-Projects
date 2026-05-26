@@ -4,8 +4,10 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils import timezone
+from datetime import timedelta 
 from decimal import Decimal
 from .models import Ingredient, PantryItem, Recipe, RecipeIngredient, MealPlan
+import json
 
 # Create your views here.
 def index(request):
@@ -198,7 +200,7 @@ def api_move_meal_plan(request):
         try:
             data = json.loads(request.body)
             recipe_id = data.get("plan_id")         # Coming from data-recipe-id in the JS.
-            target_date = data.get("new_date")      # e.g., "MON", "TUE", etc.
+            day_code = data.get("new_date")      # e.g., "MON", "TUE", etc.
             meal_type = data.get("meal_type")       # e.g., "breakfast", "lunch", "dinner"
             
             # 1. Map frontend day codes to clean database date strings for this current week
@@ -209,22 +211,24 @@ def api_move_meal_plan(request):
                 "MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6
             }
             
-            if day_code in day_offsets:
-                target_date = start_of_week + timedelta(days=day_offsets[day_code])
+            # Force matching to uppercase to prevent casing mismatches from frontend
+            lookup_code = str(day_code).upper() if day_code else ""
+            
+            if lookup_code in day_offsets:
+                target_date = start_of_week + timedelta(days=day_offsets[lookup_code])
             else:
-                target_date = today # Fallback safety measure
+                return JsonResponse({"status": "error", "message": f"Invalid day code: {day_code}"}, status=400)
                 
             # 2. Fetch the recipe being dragged.
             try:
                 recipe = Recipe.objects.get(id=recipe_id)
             except Recipe.DoesNotExist:
-                return JsonResponse({"status": "error", "message": "Recipe not found."}, status=404)
+                return JsonResponse({"status": "error", "message": f"Recipe ID {recipe_id} not found."}, status=404)
             
-            # 3. Updated or create the meal plan entry in your calendar matrix
-            # update_or_create overrides the slot if a user drags a new meal onto it.
+            # 3. Updated or create the meal plan entry in your calendar matrix.
             plan, created = MealPlan.objects.update_or_create(
                 user=request.user,
-                date=target_date,      # Check your MealPlan model: change to 'date' if your model uses date fields!
+                date=target_date,      
                 meal_type=meal_type,
                 defaults={"recipe": recipe}
             )
@@ -232,6 +236,8 @@ def api_move_meal_plan(request):
             return JsonResponse({"status": "success", "message": f"{recipe.title} scheduled successfully."})
             
         except Exception as e:
+            # Helpful for debugging terminal output
+            print(f"Exception encountered: {str(e)}")
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405) 

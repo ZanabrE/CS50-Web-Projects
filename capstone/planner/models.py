@@ -91,13 +91,21 @@ class MealPlan(models.Model):
     Binds recipes to a unique user account and specific calendar coordinates
     mainpulates by frontend drag-and-drop mechanisms.
     """
+    MEAL_CHOICES = [
+        ('Breakfast', 'Breakfast'),
+        ('Lunch', 'Lunch'),
+        ('Dinner', 'Dinner'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="meal_plans")
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     date = models.DateField()
+    meal_type = models.CharField(max_length=15, choices=MEAL_CHOICES, default='Dinner')
     
     class Meta:
         ordering = ['date']
-        unique_together = ('user', 'recipe', 'date')
+        unique_together = ('user', 'recipe', 'meal_type')
         
     def __str__(self):
         return f"Capstone Schedule ({self.user.username}): {self.recipe.title} on {self.date}"
+    
