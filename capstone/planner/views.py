@@ -12,9 +12,13 @@ import json
 
 # Create your views here.
 def index(request):
+    """Renders the public landing homepage of the meal planner application."""
     return render(request, "planner/index.html")
 
-# 1. User authentication controllers
+# =========================================================================
+# 1. USER AUTHENTICATION CONTROLLERS
+# =========================================================================
+
 def register_view(request):
     """Handles new user account registration"""
     if request.method == "POST":
@@ -26,7 +30,7 @@ def register_view(request):
     else:
         form = UserCreationForm()
     
-    # Add Bootstrap styling class directly to fields dynamically
+    # Inject styling helper classes dynamically across all active fields
     for field in form.fields.values():
         field.widget.attrs.update({
             'class': 'form-control',
@@ -55,10 +59,15 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
-# 2. Analytical matching engine and dashboard.
+# =========================================================================
+# 2. ANALYTICAL MATCHING ENGINE AND DASHBOARD
+# =========================================================================
+
 @login_required
 def dashboard_view(request):
     """
+    Automated Mathematical Matching Engine Backend Core Logic.
+    
     Main execution engine. Analyzes private user pantry inventory against
     recipe join tables to dynamically calculate stock matchin precentages.
     """
@@ -66,34 +75,34 @@ def dashboard_view(request):
     user = request.user
     today = timezone.now().date()
     
-    # Fetch user's pantry items and prefetch ingredients to avoid N+1 queries
+    # Prefetch ingredients to minimize overhead database hits (Avoids N+1 Query Problem)
     pantry_items = PantryItem.objects.filter(user=user).select_related('ingredient')
     
-    # Identify critical items expiring within the next 3 days
+    user_stock = {}
     expiring_items = []
     seen_ingredients = set()
 
-    for item in pantry_items:
-        # Safely handle potential model method errors
-        try:
-            days_left = item.days_until_expiration()
-        except:
-            days_left = 99
-        
-        if days_left <= 3:
-            if item.ingredient.id not in seen_ingredients:
-                expiring_items.append(item)
-                seen_ingredients.add(item.ingredient.id)
-    
-    # Build a flattered dictionary mapping avaiable ingredients to their total quantities
-    user_stock = {}
+    # Consolidated logic pass loop. This ensures ALL pantry ingredients are counted 
+    # for recipe matching, while safely isolating expiring items under a 3-day window threshold.
     for item in pantry_items:
         ing_id = item.ingredient.id
+        
+        # Aggregate inventory quantities together (handles duplicate items seamlessly)
         if ing_id not in user_stock:
             user_stock[ing_id] = Decimal("0.00")
         user_stock[ing_id] += item.quantity
+        
+        # Evaluate date metrics to catch critical spoilage candidates
+        try:
+            days_left = item.days_until_expiration()
+        except Exception:
+            days_left = 99
+        
+        if days_left <= 3 and ing_id not in seen_ingredients:
+            expiring_items.append(item)
+            seen_ingredients.add(ing_id)
     
-    # Run the matching algorithm across all system recipes
+    # Query recipes and prefetch join table parameters
     all_recipes = Recipe.objects.prefetch_related('recipe_ingredients__ingredient')
     recommended_recipes = []
     
@@ -107,14 +116,14 @@ def dashboard_view(request):
         
         for req in requirements:
             req_ing_id = req.ingredient.id
-            # Check if user owns the ingredient and has a sufficient quantity
+            # Validate user owns the item and satisfies the requested baseline recipe quantity
             if req_ing_id in user_stock and user_stock[req_ing_id] >= req.quantity:
                 matched_ingredients += 1
         
-        # Calculate matching accuracy ration percentage
+        # Quantitative Matching Accuracy Formula Ratio
         match_percentage = int((matched_ingredients / total_ingredients_count) * 100)
         
-        # Keep recipes that have a solid match footprint
+        # Filter threshold gatekeeping layer (requires minimum 25% completion footprint)
         if match_percentage >= 25:
             recommended_recipes.append({
                 "recipe": recipe,
@@ -125,6 +134,7 @@ def dashboard_view(request):
     # Sort recommendations: highest matching percentages first
     recommended_recipes.sort(key=lambda x: x["match_percentage"], reverse=True)
         
+    # Configuration structure for structural frontend calendar template loops
     calendar_days = [
         {"code": "MON", "name": "Monday"},
         {"code": "TUE", "name": "Tuesday"},
@@ -135,31 +145,33 @@ def dashboard_view(request):
         {"code": "SUN", "name": "Sunday"},
     ]
 
-    # Fetch existing meals already saved by this user
+    # Fetch scheduled meal plans already saved by this active profile
     saved_meals = MealPlan.objects.filter(user=user).select_related('recipe')
     
-    # A dynamic string attribute to map DB dates to layout codes
+    # Map calendar datetime indices into standard layout codes
     day_map = {0: "MON", 1: "TUE", 2: "WED", 3: "THU", 4: "FRI", 5: "SAT", 6: "SUN"}
     for plan in saved_meals:
-        # This adds a custom .day_code variable onto each meal object for your template
         plan.day_code = day_map.get(plan.date.weekday(), "MON")
 
     context = {
         "pantry_items": pantry_items,
         "expiring_items": expiring_items,
-        "recommended_recipes": recommended_recipes[:6],
+        "recommended_recipes": recommended_recipes[:6],  # Constrain UI view window to top 6 hits
         "today": today,
         "calendar_days": calendar_days,  
         "saved_meals": saved_meals,      
     }
-        
-    return render(request, "planner/index.html", context) 
     
+    return render(request, "planner/dashboard.html", context) 
+
+# =========================================================================
+# 3. ASYNCHRONOUS REST API ENDPOINTS
+# =========================================================================
+  
 @login_required
 def api_add_pantry_item(request):
     """Asysnchronously adds a new item to the user's pantry via a JavaScript POST payload."""
     if request.method == "POST":
-        import json
         try:
             data = json.loads(request.body)
             ingredient_id = data.get("ingredient_id")
@@ -203,7 +215,6 @@ def api_delete_pantry_item(request, item_id):
 def api_move_meal_plan(request):
     """Updates backend calendar dates asynchronously during frontend drag-and-drop operations."""
     if request.method == "PUT":
-        import json
         try:
             data = json.loads(request.body)
             recipe_id = data.get("plan_id")      # Coming from data-recipe-id in the JS.
