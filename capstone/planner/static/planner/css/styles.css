@@ -1,42 +1,133 @@
+/* =========================================================================
+   1. PREMIUM CONTEMPORARY BACKGROUND ENGINE (GLASSMORPHISM STYLE)
+   ========================================================================= */
+body {
+    /* Rich, smooth modern gradient that completely eliminates the plain white look */
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 50%, #d5dae6 100%);
+    background-attachment: fixed; /* Keeps the gradient pinned while you scroll the matrix */
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #2d3748;
+}
+
+/* Semi-transparent "Glass" Panel Floating Effect for Dashboard Sections */
+.card {
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+}
+
+/* Make individual day columns float cleanly over the base background canvas */
+.calendar-day-column {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    border-radius: 14px !important;
+    transition: transform 0.2s ease;
+}
+
+.calendar-day-column:hover {
+    transform: translateY(-2px); /* Subtle hover lift for tactile response */
+}
+
+/* =========================================================================
+   2. REFRESHED CONTRAST PATTERNS FOR SECTIONS
+   ========================================================================= */
+/* Recipe Pool Sidebar Panel Wrapper Adjustment */
+#recipe-pool {
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Draggable Cards - Sharp, crisp containers to contrast against the blurred backdrop */
 .recipe-card {
-    background-color: var(--card-background-color);
-    border: 2px solid var(--primary);
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    border-radius: 4px;
-    cursor: grab;
-    transition: transform 0.1s ease;
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.recipe-card:active {
-    cursor: grabbing;
-    transform: scale(0.95);
-}
-
+/* Target Drag Drop Zones */
 .meal-slot {
-    background: var(--code-background-color);
-    border: 2px dashed #ccc;
-    min-height: 80px;
-    padding: 0.25rem;
-    margin-bottom: 0.5rem;
-    border-radius: 4px;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    background-color: rgba(247, 250, 252, 0.6) !important;
+    border: 2px dashed #cbd5e0 !important;
 }
 
-/* JavaScript toggles this class during active drag-and-drop hover actions */
 .meal-slot.drag-hover {
-    background: #e0f0ff;
-    border-color: var(--primary);
+    background-color: #e6f4ff !important;
+    border-color: #3182ce !important;
 }
 
-.slot-label {
-    display: block;
-    font-size: 0.7rem;
-    color: #888;
-    text-transform: uppercase;
+
+/* =========================================================================
+   3. METRIC PROGRESS TRACKERS & MODAL DIALOG OVERLAYS
+   ========================================================================= */
+progress {
+    accent-color: #48bb78;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    background-color: #edf2f7;
+    border: none;
 }
 
-/* Prevents child elements inside the slot from breaking dragover track loops */
-.meal-slot * {
-    pointer-events: none;
+/* Smooth interpolation physics for filling metric progress bars on drop calculations */
+progress::-webkit-progress-value {
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+progress::-moz-progress-bar {
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Native HTML5 Overlay Enhancement Layer */
+dialog#optimization-modal {
+    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+dialog#optimization-modal::backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+/* =========================================================================
+   4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
+   ========================================================================= */
+@media (max-width: 991px) {
+    /* Collapse the 7-column horizontal workspace viewport row into an vertical list configuration */
+    .calendar-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    .calendar-day-column {
+        width: 100% !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* Restructure drop cells into wide alignment bands safe for mobile touch gestures */
+    .meal-slot {
+        min-height: 60px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0.75rem !important;
+        text-align: left !important;
+    }
+
+    .slot-label {
+        margin-bottom: 0 !important;
+        display: inline-block !important;
+        width: 90px;
+    }
+
+    .slot-occupied-zone {
+        margin-top: 0 !important;
+        flex-grow: 1;
+        text-align: right;
+    }
 }
