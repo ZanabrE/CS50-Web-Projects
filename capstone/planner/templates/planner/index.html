@@ -10,31 +10,40 @@
     <aside class="col-12 col-md-4 col-lg-3" id="macro-summary-panel">
         <div class="card p-3 shadow-sm mb-3">
             <h5 class="card-title fw-bold">Daily Progress Overview</h5>
+            <p class="text-primary small fw-bold mb-3" id="active-day-tracker-label">Selected: Monday</p>
             
             <div class="mb-2">
                 <label for="calories-progress" class="form-label mb-1 small text-muted">Calories Target (2000 kcal)</label>
-                <progress id="calories-progress" class="w-100" value="0" max="2000"></progress>
+                <progress id="calories-progress" class="w-100" value="{{ mon_cals }}" max="2000"></progress>
+                <small class="text-muted d-block text-end" id="calories-text-value">{{ mon_cals }} / 2000 kcal</small>
             </div>
 
             <div class="mb-1">
                 <label for="protein-progress" class="form-label mb-1 small text-muted">Protein Target (150g)</label>
-                <progress id="protein-progress" class="w-100" value="0" max="150"></progress>
+                <progress id="protein-progress" class="w-100" value="{{ mon_prot }}" max="150"></progress>
+                <small class="text-muted d-block text-end" id="protein-text-value">{{ mon_prot }} / 150g</small>
             </div>
         </div>
 
-        <!-- DYNAMIC RECIPE POOL: Renders your custom algorithm calculations -->
+        <!-- DYNAMIC RECIPE POOL -->
         <div class="card p-3 shadow-sm" id="recipe-pool">
             <h6 class="border-bottom pb-2 fw-bold text-secondary">Available Recipes</h6>
             {% if recommended_recipes %}
                 {% for item in recommended_recipes %}
-                    <!-- Draggable Card Component hooked to calendar.js listeners -->
-                    <div class="recipe-card p-2 mb-2 border rounded bg-light" draggable="true" data-recipe-id="{{ item.recipe.id }}" style="cursor: grab;">
+                    <!-- FIXED: Added calorie and protein tracking metadata fields directly onto the node layout -->
+                    <div class="recipe-card p-2 mb-2 border rounded bg-light" 
+                         draggable="true" 
+                         data-recipe-id="{{ item.recipe.id }}" 
+                         data-calories="{{ item.recipe.calories }}"
+                         data-protein="{{ item.recipe.protein }}"
+                         style="cursor: grab;">
                         <div class="d-flex justify-content-between align-items-start">
                             <strong class="text-dark small">{{ item.recipe.title }}</strong>
                             <span class="badge bg-success small">{{ item.match_percentage }}%</span>
                         </div>
-                        <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                        <div class="text-muted mt-1 d-flex justify-content-between" style="font-size: 0.75rem;">
                             <span>Missing items: {{ item.missing_count }}</span>
+                            <span class="text-primary fw-bold">{{ item.recipe.calories }} kcal</span>
                         </div>
                     </div>
                 {% endfor %}
@@ -49,16 +58,18 @@
         <div class="card p-3 shadow-sm h-100">
             <h2 class="h5 fw-bold mb-3 text-secondary">Weekly Calendar Matrix</h2>
             <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 0.5rem; overflow-x: auto;">
-                <!-- Django loops through days provided by your view -->
                 {% for day in calendar_days %}
-                <div class="calendar-day-column border rounded p-2 bg-white" data-day-code="{{ day.code }}">
+                <div class="calendar-day-column border rounded p-2 bg-white" data-day-code="{{ day.code }}" data-day-name="{{ day.name }}">
                     <h6 class="text-center text-primary border-bottom pb-1 fw-bold" style="font-size: 0.85rem;">{{ day.name }}</h6>
                     
                     <!-- Breakfast Slot -->
-                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Breakfast" style="min-height: 70px;">
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" 
+                         data-meal-type="Breakfast" 
+                         data-current-calories="{% for plan in saved_meals %}{% if plan.date_code == day.code and plan.meal_type == 'Breakfast' %}{{ plan.recipe.calories }}{% endif %}{% endfor %}"
+                         data-current-protein="{% for plan in saved_meals %}{% if plan.date_code == day.code and plan.meal_type == 'Breakfast' %}{{ plan.recipe.protein }}{% endif %}{% endfor %}"
+                         style="min-height: 70px;">
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">BREAKFAST</small>
                         <div class="slot-occupied-zone mt-1">
-                            <!-- Keep meals on page reload -->
                             {% for plan in saved_meals %}
                                 {% if plan.date_code == day.code and plan.meal_type == "Breakfast" %}
                                     <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
@@ -68,7 +79,11 @@
                     </div>
 
                     <!-- Lunch Slot -->
-                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Lunch" style="min-height: 70px;">
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" 
+                         data-meal-type="Lunch" 
+                         data-current-calories="{% for plan in saved_meals %}{% if plan.date_code == day.code and plan.meal_type == 'Lunch' %}{{ plan.recipe.calories }}{% endif %}{% endfor %}"
+                         data-current-protein="{% for plan in saved_meals %}{% if plan.date_code == day.code and plan.meal_type == 'Lunch' %}{{ plan.recipe.protein }}{% endif %}{% endfor %}"
+                         style="min-height: 70px;">
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">LUNCH</small>
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
@@ -80,7 +95,11 @@
                     </div>
 
                     <!-- Dinner Slot -->
-                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Dinner" style="min-height: 70px;">
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" 
+                         data-meal-type="Dinner" 
+                         data-current-calories="{% for plan in saved_meals %}{% if plan.date_code == day.code and plan.meal_type == 'Dinner' %}{{ plan.recipe.calories }}{% endif %}{% endfor %}"
+                         data-current-protein="{% for plan in saved_meals %}{% if plan.date_code == day.code and plan.meal_type == 'Dinner' %}{{ plan.recipe.protein }}{% endif %}{% endfor %}"
+                         style="min-height: 70px;">
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">DINNER</small>
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
@@ -93,18 +112,15 @@
                 </div>
                 {% endfor %}
             </div>
-
         </div>
     </section>
-
 </div>
 
-<!-- MODAL OVERLAY: Optimization Suggester Results Zone (Expiring Pantry Items) -->
+<!-- OPTIMIZATION MODAL CONTAINER -->
 <dialog id="optimization-modal" class="border-0 rounded p-4 shadow" style="max-width: 500px; width: 90%;">
     <article>
         <h3 class="text-danger h5 fw-bold mb-2">&#9888; Food Waste Optimization</h3>
         <p class="text-muted small mb-3">The following items are expiring within 3 days. Move matching recipes to your calendar matrix to utilize them:</p>
-        
         <ul class="list-group mb-3" id="optimization-results-list">
             {% if expiring_items %}
                 {% for item in expiring_items %}
@@ -117,7 +133,6 @@
                 <li class="list-group-item text-muted text-center small py-3">Your pantry inventory is clear of short-term expirations!</li>
             {% endif %}
         </ul>
-        
         <div class="text-end">
             <button type="button" class="btn btn-secondary btn-sm" id="close-modal-btn">Close Matrix</button>
         </div>

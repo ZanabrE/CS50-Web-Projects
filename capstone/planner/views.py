@@ -144,14 +144,35 @@ def dashboard_view(request):
         {"code": "SAT", "name": "Saturday"},
         {"code": "SUN", "name": "Sunday"},
     ]
+    
+    # Initialize zero-sum baseline values for all 7 matrix days
+    daily_macros = {
+        "MON": {"calories": 0, "protein": 0.0},
+        "TUE": {"calories": 0, "protein": 0.0},
+        "WED": {"calories": 0, "protein": 0.0},
+        "THU": {"calories": 0, "protein": 0.0},
+        "FRI": {"calories": 0, "protein": 0.0},
+        "SAT": {"calories": 0, "protein": 0.0},
+        "SUN": {"calories": 0, "protein": 0.0},
+    }
 
     # Fetch scheduled meal plans already saved by this active profile
     saved_meals = MealPlan.objects.filter(user=user).select_related('recipe')
     
     # Map calendar datetime indices into standard layout codes
     day_map = {0: "MON", 1: "TUE", 2: "WED", 3: "THU", 4: "FRI", 5: "SAT", 6: "SUN"}
+    
     for plan in saved_meals:
-        plan.date_code = day_map.get(plan.date.weekday(), "MON")
+        code = day_map.get(plan.date.weekday(), "MON")
+        plan.date_code = code
+        
+        # Aggregate macros if a valid recipe relation exists in this plan
+        if plan.recipe:
+            # Safely extract values using model attributes fallback defaulting to 0
+            cals = getattr(plan.recipe, 'calories', 0) or 0
+            prot = getattr(plan.recipe, 'protein', 0) or 0
+            daily_macros[code]["calories"] += int(cals)
+            daily_macros[code]["protein"] += int(prot)
 
     context = {
         "pantry_items": pantry_items,
@@ -159,7 +180,8 @@ def dashboard_view(request):
         "recommended_recipes": recommended_recipes[:6],  # Constrain UI view window to top 6 hits
         "today": today,
         "calendar_days": calendar_days,  
-        "saved_meals": saved_meals,      
+        "saved_meals": saved_meals,
+        "daily_macros": daily_macros, 
     }
     
     return render(request, "planner/index.html", context) 
