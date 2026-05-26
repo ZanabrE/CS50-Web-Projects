@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta 
 from decimal import Decimal
+from django.db.models import Q
 from .models import Ingredient, PantryItem, Recipe, RecipeIngredient, MealPlan
 import json
 
@@ -136,6 +137,12 @@ def dashboard_view(request):
 
     # Fetch existing meals already saved by this user
     saved_meals = MealPlan.objects.filter(user=user).select_related('recipe')
+    
+    # A dynamic string attribute to map DB dates to layout codes
+    day_map = {0: "MON", 1: "TUE", 2: "WED", 3: "THU", 4: "FRI", 5: "SAT", 6: "SUN"}
+    for plan in saved_meals:
+        # This adds a custom .day_code variable onto each meal object for your template
+        plan.day_code = day_map.get(plan.date.weekday(), "MON")
 
     context = {
         "pantry_items": pantry_items,
@@ -199,9 +206,9 @@ def api_move_meal_plan(request):
         import json
         try:
             data = json.loads(request.body)
-            recipe_id = data.get("plan_id")         # Coming from data-recipe-id in the JS.
+            recipe_id = data.get("plan_id")      # Coming from data-recipe-id in the JS.
             day_code = data.get("new_date")      # e.g., "MON", "TUE", etc.
-            meal_type = data.get("meal_type")       # e.g., "breakfast", "lunch", "dinner"
+            meal_type = data.get("meal_type")    # e.g., "breakfast", "lunch", "dinner"
             
             # 1. Map frontend day codes to clean database date strings for this current week
             today = timezone.now().date()
@@ -240,4 +247,50 @@ def api_move_meal_plan(request):
             print(f"Exception encountered: {str(e)}")
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     
-    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405) 
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+def get_recommended_recipes(user):
+    """
+    Compares active user pantry quantities against recipe needs.
+    Generates a dynamic list of matches with percentage values.
+    """ 
+
+    # 1. Get all unique ingredients IDs currently sitting in the user's pantry
+    # Filter out items that are strictly expired to optimized food safety
+    active_pantry = PantryItem.objects.filter(
+        user=user,
+        expiration_date_gte=timezone.now().date()
+    )
+    pantry_ingredient_ids = set(active_pantry.values_list('ingredient_id', flat=True))
+    
+    recommended_pool =[]
+    all_recipes = Recipe.objects.prefetch_related('recipe_ingredients__ingredient').all()
+    
+    for recipe in all_recipes:
+        recipe_ingredients = recipe.recipe_ingredients.all()
+        total_required_items = recipe_ingredients.count()
+        
+        if total_required_items == 0:
+            continue
+        
+        # Count how many ingredients for this recipe exist in the user's pantry
+        matching_count = 0
+        for req  in recipe_ingredients:
+            if req.ingredient.id in pantry_ingredient_ids:
+                matching_count += 1
+                
+        # 2. Calculate the match percentage
+        match_percentage = int((matching_count / total_required_items) * 100)
+        missing_count = total_required_items - matching_count
+        
+        # 3. Cap the results to your template requirment: Min. 25% match required
+        if match_percentage >= 25:
+            recommended_pool.append({
+                "recipe": recipe,
+                "match_percentage": match_percentage,
+                "missing_count": missing_count
+            })
+    
+    # 4. Sort pool so highest matches appear at the top of the sidebar matrix
+    recommended_pool.sort(key=lambda x: x["match_percentage"], reverse=True)
+    return recommended_pool
