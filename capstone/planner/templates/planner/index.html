@@ -60,7 +60,7 @@
                         <div class="slot-occupied-zone mt-1">
                             <!-- Keep meals on page reload -->
                             {% for plan in saved_meals %}
-                                {% if plan.date == day.code and plan.meal_type == "Breakfast" %}
+                                {% if plan.date_code == day.code and plan.meal_type == "Breakfast" %}
                                     <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
                                 {% endif %}
                             {% endfor %}
@@ -72,7 +72,7 @@
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">LUNCH</small>
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
-                                {% if plan.date == day.code and plan.meal_type == "Lunch" %}
+                                {% if plan.date_code == day.code and plan.meal_type == "Lunch" %}
                                     <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
                                 {% endif %}
                             {% endfor %}
@@ -84,7 +84,7 @@
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">DINNER</small>
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
-                                {% if plan.date == day.code and plan.meal_type == "Dinner" %}
+                                {% if plan.date_code == day.code and plan.meal_type == "Dinner" %}
                                     <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
                                 {% endif %}
                             {% endfor %}
