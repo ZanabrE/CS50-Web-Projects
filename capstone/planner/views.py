@@ -162,7 +162,7 @@ def dashboard_view(request):
         "saved_meals": saved_meals,      
     }
     
-    return render(request, "planner/dashboard.html", context) 
+    return render(request, "planner/index.html", context) 
 
 # =========================================================================
 # 3. ASYNCHRONOUS REST API ENDPOINTS
@@ -269,8 +269,8 @@ def get_recommended_recipes(user):
     # 1. Get all unique ingredients IDs currently sitting in the user's pantry
     # Filter out items that are strictly expired to optimized food safety
     active_pantry = PantryItem.objects.filter(
-        user=user,
-        expiration_date_gte=timezone.now().date()
+        Q(user=user) & 
+        (Q(expiration_date__gte=timezone.now().date()) | Q(expiration_date__isnull=True))
     )
     pantry_ingredient_ids = set(active_pantry.values_list('ingredient_id', flat=True))
     
@@ -287,7 +287,7 @@ def get_recommended_recipes(user):
         # Count how many ingredients for this recipe exist in the user's pantry
         matching_count = 0
         for req  in recipe_ingredients:
-            if req.ingredient.id in pantry_ingredient_ids:
+            if req.ingredient_id in pantry_ingredient_ids:
                 matching_count += 1
                 
         # 2. Calculate the match percentage

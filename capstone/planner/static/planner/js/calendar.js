@@ -8,10 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const tokenFromDom = document.getElementById("csrf-token")?.value;
         if (tokenFromDom) return tokenFromDom;
 
-        return document.cookie.split(';')
-            .map(row => row.trim()) // clean up leading/trailing spaces
-            .find(row => row.startsWith('csrftoken='))
-            ?.split('=')[1];
+        const cookieValue = document.cookie.split('; ')
+            .find(row => row.startsWith('csrftoken='));
+        return cookieValue ? cookieValue.split('=')[1] : null;
     }
         
 
@@ -20,15 +19,15 @@ document.addEventListener("DOMContentLoaded", () => {
         card.addEventListener("dragstart", (e) => {
             const targetCard = e.target.closest(".recipe-card");
             if (targetCard) {
-                e.dataTransfer.setData("text/plain", e.currentTarget.dataset.recipeId);
-                e.currentTarget.classList.add("dragging");
+                e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
+                targetCard.classList.add("dragging");
             }
         });
 
         card.addEventListener("dragend", (e) => {
             const targetCard = e.target.closest(".recipe-card");
             if (targetCard) {
-                e.currentTarget.classList.remove("dragging");
+                targetCard.classList.remove("dragging");
             }
         });
     });
@@ -49,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
             slot.classList.remove("drag-hover");
 
             const recipeId = e.dataTransfer.getData("text/plain");
-            const targetDay = slot.closest(".calendar-day-column").dataset.dayCode;
+            const targetDay = slot.closest(".calendar-day-column")?.dataset.dayCode;
             const mealType = slot.dataset.mealType;
             const csrfToken = getCsrfToken();
 
@@ -73,14 +72,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if (response.ok && data.status === "success") {
                         // Update the UI slot with the new recipe title without a full page refresh
-                        const originCard = document.querySelector(`#recipe-pool [data-recipe-id="${recipeId}"]`);
+                        const originCard = document.querySelector(`[data-recipe-id="${recipeId}"]`);
 
                         if (originCard) {
                             const occupiedZone = slot.querySelector(".slot-occupied-zone");
-                            const recipeTitle = originCard.querySelector('strong').innerText;
+                            const recipeTitle = originCard.querySelector('strong')?.innerText || "Selected Recipe";
+                            const badgeHtml = `<span class="badge bg-primary w-100 py-2 text-wrap">${recipeTitle}</span>`;
                             
-                            // Render clean inside your template's layout space
-                            occupiedZone.innerHTML = `<span class="badge bg-primary w-100 py-2 text-wrap">${recipeTitle}</span>`;
+                            // Safety fallback if .slot-occupied-zone does not exist
+                            if (occupiedZone) {
+                                occupiedZone.innerHTML = badgeHtml;
+                            } else {
+                                slot.innerHTML = badgeHtml;
+                            }
                         }
                     } else {
                         console.error("Database sync failed:", data.message || "Unknown error");

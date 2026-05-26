@@ -45,7 +45,7 @@
     </aside>
 
     <!-- MAIN BODY SECTION: 7-Day Planning Layout Matrix -->
-    <section class="col-12col-md-8 col-lg-9" id="calendar-workspace">
+    <section class="col-12 col-md-8 col-lg-9" id="calendar-workspace">
         <div class="card p-3 shadow-sm h-100">
             <h2 class="h5 fw-bold mb-3 text-secondary">Weekly Calendar Matrix</h2>
             <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, minmax(110px, 1fr)); gap: 0.5rem; overflow-x: auto;">
@@ -68,7 +68,7 @@
                     </div>
 
                     <!-- Lunch Slot -->
-                    <div class="meal-slot border rounded p-1 my-1 bg-light text-center" data-meal-type="Lunch" style="min-height: 70px;">
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Lunch" style="min-height: 70px;">
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">LUNCH</small>
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
@@ -80,7 +80,7 @@
                     </div>
 
                     <!-- Dinner Slot -->
-                    <div class="meal-slot border rounded p-1 my-1 bg-light text-center" data-meal-type="Dinner" style="min-height: 70px;">
+                    <div class="meal-slot border rounded p-2 my-2 bg-light text-center" data-meal-type="Dinner" style="min-height: 70px;">
                         <small class="slot-label text-muted d-block fw-bold" style="font-size: 0.6rem;">DINNER</small>
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
