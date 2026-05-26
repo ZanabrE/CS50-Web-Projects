@@ -72,8 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const data = await response.json();
 
                     if (response.ok && data.status === "success") {
-                        // Visual update: Clone recipe card inside the target container slot
-                        const originCard = document.querySelector(`[data-recipe-id="${recipeId}"]`);
+                        // Update the UI slot with the new recipe title without a full page refresh
+                        const originCard = document.querySelector(`#recipe-pool [data-recipe-id="${recipeId}"]`);
+
                         if (originCard) {
                             const occupiedZone = slot.querySelector(".slot-occupied-zone");
                             const recipeTitle = originCard.querySelector('strong').innerText;

@@ -104,7 +104,7 @@ class MealPlan(models.Model):
     
     class Meta:
         ordering = ['date']
-        unique_together = ('user', 'recipe', 'meal_type')
+        unique_together = ('user', 'date', 'meal_type')
         
     def __str__(self):
         return f"Capstone Schedule ({self.user.username}): {self.recipe.title} on {self.date}"
