@@ -72,7 +72,19 @@
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
                                 {% if plan.date_code == day.code and plan.meal_type == "Breakfast" %}
-                                    <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
+                                    <!-- ENHANCEMENT: Placed badges are now draggable ("recipe-card") and include a remove button -->
+                                    <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
+                                        draggable="true" 
+                                        data-recipe-id="{{ plan.recipe.id }}"
+                                        data-calories="{{ plan.recipe.calories }}"
+                                        data-protein="{{ plan.recipe.protein }}"
+                                        style="cursor: grab; font-size: 0.7rem;">
+                                        <strong class="text-white">{{ plan.recipe.title }}</strong>
+                                        <!-- Small close interaction cross markup button element -->
+                                        <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                                                aria-label="Remove" 
+                                                style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
+                                    </span>
                                 {% endif %}
                             {% endfor %}
                         </div>
@@ -88,7 +100,19 @@
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
                                 {% if plan.date_code == day.code and plan.meal_type == "Lunch" %}
-                                    <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
+                                    <!-- ENHANCEMENT: Placed badges are now draggable ("recipe-card") and include a remove button -->
+                                    <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
+                                        draggable="true" 
+                                        data-recipe-id="{{ plan.recipe.id }}"
+                                        data-calories="{{ plan.recipe.calories }}"
+                                        data-protein="{{ plan.recipe.protein }}"
+                                        style="cursor: grab; font-size: 0.7rem;">
+                                        <strong class="text-white">{{ plan.recipe.title }}</strong>
+                                        <!-- Small close interaction cross markup button element -->
+                                        <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                                                aria-label="Remove" 
+                                                style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
+                                    </span>
                                 {% endif %}
                             {% endfor %}
                         </div>
@@ -104,7 +128,19 @@
                         <div class="slot-occupied-zone mt-1">
                             {% for plan in saved_meals %}
                                 {% if plan.date_code == day.code and plan.meal_type == "Dinner" %}
-                                    <span class="badge bg-primary w-100 py-1 text-wrap small" style="font-size: 0.7rem;">{{ plan.recipe.title }}</span>
+                                    <!-- ENHANCEMENT: Placed badges are now draggable ("recipe-card") and include a remove button -->
+                                    <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
+                                        draggable="true" 
+                                        data-recipe-id="{{ plan.recipe.id }}"
+                                        data-calories="{{ plan.recipe.calories }}"
+                                        data-protein="{{ plan.recipe.protein }}"
+                                        style="cursor: grab; font-size: 0.7rem;">
+                                        <strong class="text-white">{{ plan.recipe.title }}</strong>
+                                        <!-- Small close interaction cross markup button element -->
+                                        <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                                                aria-label="Remove" 
+                                                style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
+                                    </span>
                                 {% endif %}
                             {% endfor %}
                         </div>

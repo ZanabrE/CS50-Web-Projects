@@ -258,6 +258,11 @@ def api_move_meal_plan(request):
                 target_date = start_of_week + timedelta(days=day_offsets[lookup_code])
             else:
                 return JsonResponse({"status": "error", "message": f"Invalid day code: {day_code}"}, status=400)
+            
+            # FEATURE ENHANCEMENT: If recipe_id is missing or null, delete the meal plan entry
+            if not recipe_id:
+                MealPlan.objects.filter(user=request.user, date=target_date, meal_type=meal_type).delete()
+                return JsonResponse({"status": "success", "action": "deleted", "message": "Meal cleared successfully."})
                 
             # 2. Fetch the recipe being dragged.
             try:
