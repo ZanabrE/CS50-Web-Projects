@@ -235,57 +235,38 @@ def api_delete_pantry_item(request, item_id):
 
 @login_required
 def api_move_meal_plan(request):
-    """Updates backend calendar dates asynchronously during frontend drag-and-drop operations."""
     if request.method == "PUT":
         try:
             data = json.loads(request.body)
-            recipe_id = data.get("plan_id")      # Coming from data-recipe-id in the JS.
-            day_code = data.get("new_date")      # e.g., "MON", "TUE", etc.
-            meal_type = data.get("meal_type")    # e.g., "breakfast", "lunch", "dinner"
+            recipe_id = data.get("plan_id")
+            day_code = data.get("new_date")
+            meal_type = data.get("meal_type")
             
-            # 1. Map frontend day codes to clean database date strings for this current week
+            # Map day codes to this week's dates
             today = timezone.now().date()
-            start_of_week = today - timedelta(days=today.weekday()) # Finds Monday
+            start_of_week = today - timedelta(days=today.weekday())
+            day_offsets = {"MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6}
+            target_date = start_of_week + timedelta(days=day_offsets.get(day_code.upper(), 0))
             
-            day_offsets = {
-                "MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6
-            }
-            
-            # Force matching to uppercase to prevent casing mismatches from frontend
-            lookup_code = str(day_code).upper() if day_code else ""
-            
-            if lookup_code in day_offsets:
-                target_date = start_of_week + timedelta(days=day_offsets[lookup_code])
-            else:
-                return JsonResponse({"status": "error", "message": f"Invalid day code: {day_code}"}, status=400)
-            
-            # FEATURE ENHANCEMENT: If recipe_id is missing or null, delete the meal plan entry
-            if not recipe_id:
+            # Case 1: CLEAR/DELETE MEAL
+            if recipe_id is None:
                 MealPlan.objects.filter(user=request.user, date=target_date, meal_type=meal_type).delete()
-                return JsonResponse({"status": "success", "action": "deleted", "message": "Meal cleared successfully."})
-                
-            # 2. Fetch the recipe being dragged.
-            try:
-                recipe = Recipe.objects.get(id=recipe_id)
-            except Recipe.DoesNotExist:
-                return JsonResponse({"status": "error", "message": f"Recipe ID {recipe_id} not found."}, status=404)
+                return JsonResponse({"status": "success", "message": "Meal removed."})
             
-            # 3. Updated or create the meal plan entry in your calendar matrix.
+            # Case 2: ADD/MOVE MEAL
+            recipe = Recipe.objects.get(id=recipe_id)
             plan, created = MealPlan.objects.update_or_create(
                 user=request.user,
                 date=target_date,      
                 meal_type=meal_type,
                 defaults={"recipe": recipe}
             )
-            
-            return JsonResponse({"status": "success", "message": f"{recipe.title} scheduled successfully."})
+            return JsonResponse({"status": "success", "message": "Meal scheduled."})
             
         except Exception as e:
-            # Helpful for debugging terminal output
-            print(f"Exception encountered: {str(e)}")
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    
-    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+    return JsonResponse({"status": "error", "message": "Invalid method."}, status=405)
+
 
 def get_recommended_recipes(user):
     """

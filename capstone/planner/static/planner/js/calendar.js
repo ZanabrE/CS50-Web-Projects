@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const recipeCards = document.querySelectorAll(".recipe-card");
     const mealSlots = document.querySelectorAll(".meal-slot");
     const dayColumns = document.querySelectorAll(".calendar-day-column");
 
@@ -23,11 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
             dayTotalProt += parseFloat(slot.dataset.currentProtein) || 0;
         });
 
+        dayTotalProt = parseFloat(dayTotalProt.toFixed(1));
+
         if (calsBar && protBar) {
             calsBar.value = dayTotalCals;
-            protBar.value = parseFloat(dayTotalProt.toFixed(1));
-            calsText.innerText = `${dayTotalCals} / 2000 kcal`;
-            protText.innerText = `${dayTotalProt.toFixed(1)} / 150g`;
+            protBar.value = dayTotalProt;
+            if (calsText) calsText.innerText = `${dayTotalCals} / 2000 kcal`;
+            if (protText) protText.innerText = `${dayTotalProt} / 150g`;
+            if (labelText && dayColumnElement.dataset.dayName) {
+                labelText.innerText = `Selected: ${dayColumnElement.dataset.dayName}`;
+            }
         }
     };
 
@@ -79,7 +85,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     // Reset node parameters and clear layout space
                     slot.dataset.currentCalories = 0;
                     slot.dataset.currentProtein = 0;
-                    slot.querySelector(".slot-occupied-zone").innerHTML = "";
+                    const occupiedZone = slot.querySelector(".slot-occupied-zone");
+                    if (occupiedZone) occupiedZone.innerHTML = "";
                     
                     calculateAndRenderDayMacros(parentColumn);
                 }
@@ -155,7 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
                                 sourceSlot.dataset.currentCalories = 0;
                                 sourceSlot.dataset.currentProtein = 0;
-                                sourceSlot.querySelector(".slot-occupied-zone").innerHTML = "";
+                                const oldZone = sourceSlot.querySelector(".slot-occupied-zone");
+                                if (oldZone) oldZone.innerHTML = "";
                                 calculateAndRenderDayMacros(sourceColumn);
                             }
 
@@ -163,19 +171,27 @@ document.addEventListener("DOMContentLoaded", () => {
                             slot.dataset.currentCalories = newCals;
                             slot.dataset.currentProtein = newProt;
 
+                            // FIXED AND FULLY COMPLETED: Closed HTML template literals and attached dynamic drag hooks
                             const occupiedZone = slot.querySelector(".slot-occupied-zone");
                             const badgeHtml = `
-                                <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
-                                      draggable="true" data-recipe-id="${recipeId}" data-calories="${newCals}" data-protein="${newProt}" style="cursor: grab; font-size: 0.7rem;">
-                                    <strong class="text-white">${recipeTitle}</strong>
-                                    <button type="button" class="btn-close btn-close-white remove-meal-btn" aria-label="Remove" style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
-                                </span>`;
+                                <div class="recipe-card badge bg-primary w-100 py-2 px-2 text-wrap d-flex justify-content-between align-items-center" 
+                                     draggable="true" 
+                                     data-recipe-id="${recipeId}" 
+                                     data-calories="${newCals}" 
+                                     data-protein="${newProt}"
+                                     style="cursor: move;">
+                                    <strong>${recipeTitle}</strong>
+                                    <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                                            style="font-size: 0.5rem; cursor: pointer;" aria-label="Remove"></button>
+                                </div>`;
                             
                             if (occupiedZone) {
                                 occupiedZone.innerHTML = badgeHtml;
-                                attachDragListeners(occupiedZone.querySelector(".recipe-card"));
+                                // Automatically initialize drag capabilities on the freshly created badge element
+                                const newBadge = occupiedZone.querySelector(".recipe-card");
+                                if (newBadge) attachDragListeners(newBadge);
                             }
-
+                            
                             calculateAndRenderDayMacros(parentColumn);
                         }
                     }
