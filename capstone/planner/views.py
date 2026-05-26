@@ -46,7 +46,7 @@ def login_view(request):
         form = AuthenticationForm()
         # Add Bootstrap styling class directly to fields dynamically
         for field in form.fields.values():
-            field.widget.attrs.update({'class': 'form-contro'}) 
+            field.widget.attrs.update({'class': 'form-control'}) 
             
     return render(request, "planner/login.html", {"form": form})
 
