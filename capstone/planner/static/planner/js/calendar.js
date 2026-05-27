@@ -1,8 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // SECURITY GUARD: If calendar elements don't exist on this screen, stop executing instantly
+    if (!document.querySelector(".calendar-day-column")) {
+        return; 
+    }
+
     const mealSlots = document.querySelectorAll(".meal-slot");
     const dayColumns = document.querySelectorAll(".calendar-day-column");
-    
-    // Correctly grab the tracking text label element from the DOM tree hierarchy
     const labelText = document.getElementById("active-day-tracker-label");
 
     const getCsrfToken = () => {
@@ -24,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let dayTotalCals = 0;
         let dayTotalProt = 0;
 
-        // Sum values across all slot blocks within the chosen day column wrapper framework
         dayColumnElement.querySelectorAll(".meal-slot").forEach(slot => {
             dayTotalCals += parseFloat(slot.dataset.currentCalories) || 0;
             dayTotalProt += parseFloat(slot.dataset.currentProtein) || 0;
@@ -32,44 +34,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dayTotalProt = parseFloat(dayTotalProt.toFixed(1));
 
-        // Update the dashboard side track panel variables layout structures
         if (calsBar) calsBar.value = dayTotalCals;
         if (protBar) protBar.value = dayTotalProt;
         if (calsText) calsText.innerText = `${dayTotalCals} / 2000 kcal`;
         if (protText) protText.innerText = `${dayTotalProt} / 150g`;
         
-        // FIXED: Safeguarded condition assignment block execution flow parameters
         if (labelText && dayColumnElement.dataset.dayName) {
             labelText.innerText = `Selected: ${dayColumnElement.dataset.dayName}`;
         }
     };
 
-        const attachDragListeners = (card) => {
-            card.addEventListener("dragstart", (e) => {
-                const targetCard = e.target.closest(".recipe-card");
-                if (targetCard) {
-                    const recipeTitle = targetCard.querySelector("strong")?.innerText || "Selected Recipe";
-                
-                    // FIXED: Send macro data straight through the drag payload 
-                    e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
-                    e.dataTransfer.setData("text/title", recipeTitle); 
-                    e.dataTransfer.setData("text/calories", targetCard.dataset.calories || "0");
-                    e.dataTransfer.setData("text/protein", targetCard.dataset.protein || "0");
-                
-                    targetCard.classList.add("dragging");
-                
-                    const sourceSlot = targetCard.closest(".meal-slot");
-                    if (sourceSlot) {
-                        sourceSlot.setAttribute("data-dragging-source", "true");
-                    }
+    const attachDragListeners = (card) => {
+        card.addEventListener("dragstart", (e) => {
+            const targetCard = e.target.closest(".recipe-card");
+            if (targetCard) {
+                const recipeTitle = targetCard.querySelector("strong")?.innerText || "Selected Recipe";
+            
+                e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
+                e.dataTransfer.setData("text/title", recipeTitle); 
+                e.dataTransfer.setData("text/calories", targetCard.dataset.calories || "0");
+                e.dataTransfer.setData("text/protein", targetCard.dataset.protein || "0");
+            
+                targetCard.classList.add("dragging");
+            
+                const sourceSlot = targetCard.closest(".meal-slot");
+                if (sourceSlot) {
+                    sourceSlot.setAttribute("data-dragging-source", "true");
                 }
-            });
+            }
+        });
 
-            card.addEventListener("dragend", (e) => {
-                const targetCard = e.target.closest(".recipe-card");
-                if (targetCard) {
-                    targetCard.classList.remove("dragging");
-                }
+        card.addEventListener("dragend", (e) => {
+            const targetCard = e.target.closest(".recipe-card");
+            if (targetCard) {
+                targetCard.classList.remove("dragging");
+            }
             document.querySelectorAll("[data-dragging-source]").forEach(el => el.removeAttribute("data-dragging-source"));
         });
     };
@@ -105,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Attach tracking properties to initial template layout markup
     document.querySelectorAll(".recipe-card").forEach(card => attachDragListeners(card));
 
     document.addEventListener("click", (e) => {
@@ -115,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Seamless layout target row delegation bindings
     dayColumns.forEach(column => {
         column.addEventListener("click", () => {
             calculateAndRenderDayMacros(column);
@@ -134,7 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             slot.classList.remove("drag-hover");
             
-            // Extract values directly from the drag payload event data transfer stream
             const recipeId = e.dataTransfer.getData("text/plain");
             const recipeTitle = e.dataTransfer.getData("text/title"); 
             const newCals = parseFloat(e.dataTransfer.getData("text/calories")) || 0;
@@ -142,11 +138,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const parentColumn = slot.closest(".calendar-day-column");
             const targetDay = parentColumn?.dataset.dayCode;
+            const dayName = parentColumn?.dataset.dayName || "this day";
             const mealType = slot.dataset.mealType;
             const csrfToken = getCsrfToken();
             const sourceSlot = document.querySelector("[data-dragging-source]");
 
             if (recipeId && targetDay && csrfToken) {
+                const isDuplicate = Array.from(parentColumn.querySelectorAll(".recipe-card"))
+                    .some(card => card.dataset.recipeId === recipeId && card.closest(".meal-slot") !== sourceSlot);
+
+                if (isDuplicate) {
+                    alert(`⚠ "${recipeTitle}" is already scheduled for ${dayName}!`);
+                    return; 
+                }
+
                 try {
                     const response = await fetch("/api/calendar/move/", {
                         method: "PUT",
@@ -159,13 +164,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (response.ok && data.status === "success") {
                         if (sourceSlot && sourceSlot !== slot) {
                             const sourceColumn = sourceSlot.closest(".calendar-day-column");
-                            
-                            await fetch("/api/calendar/move/", {
-                                method: "PUT",
-                                headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-                                body: JSON.stringify({ plan_id: null, new_date: sourceColumn.dataset.dayCode, meal_type: sourceSlot.dataset.mealType })
-                            });
-
                             sourceSlot.dataset.currentCalories = 0;
                             sourceSlot.dataset.currentProtein = 0;
                             const oldZone = sourceSlot.querySelector(".slot-occupied-zone");
@@ -195,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             const newlyAddedBadge = occupiedZone.querySelector(".recipe-card");
                             attachDragListeners(newlyAddedBadge);
                         }
-                        
                         calculateAndRenderDayMacros(parentColumn);
                     }
                 } catch (error) {
@@ -204,4 +201,39 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }); 
     });
+
+    // =========================================================================
+    // ASYNCHRONOUS DIALOG INTERACTION HANDLERS (OPTIMIZER MODAL)
+    // =========================================================================
+    const modal = document.getElementById("optimization-modal");
+    const openBtn = document.getElementById("run-optimizer-btn");
+    const closeBtn = document.getElementById("close-modal-btn");
+
+    if (openBtn && modal) {
+        openBtn.addEventListener("click", (e) => {
+
+        e.preventDefault();
+        modal.showModal();
+    });
+    }
+
+    if (closeBtn && modal) {
+        closeBtn.addEventListener("click", () => {
+        modal.close();
+        });
+    }
+
+    if (modal) {
+        modal.addEventListener("click", (e) => {
+            const dialogDimensions = modal.getBoundingClientRect();
+            if (
+                e.clientX < dialogDimensions.left ||
+                e.clientX > dialogDimensions.right ||
+                e.clientY < dialogDimensions.top ||
+                e.clientY > dialogDimensions.bottom
+            ) {
+                modal.close();
+            }
+        });
+    }
 });

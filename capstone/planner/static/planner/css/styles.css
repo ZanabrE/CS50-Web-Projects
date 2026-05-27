@@ -98,38 +98,25 @@ dialog#optimization-modal::backdrop {
 /* =========================================================================
    4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
    ========================================================================= */
-@media (max-width: 991px) {
-    /* Collapse the 7-column horizontal workspace viewport row into an vertical list configuration */
+@media (max-width: 1199px) {
     .calendar-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 1rem !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, minmax(130px, 1fr)) !important;
+        overflow-x: auto !important;
+        padding-bottom: 10px;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .calendar-day-column {
-        width: 100% !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-    }
-
-    /* Restructure drop cells into wide alignment bands safe for mobile touch gestures */
+    /* SAFE MOBILE CELL STYLING: Keeps items stacked vertically inside the grid columns */
     .meal-slot {
-        min-height: 60px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        padding: 0.75rem !important;
-        text-align: left !important;
+        min-height: 80px !important;
+        padding: 0.5rem !important;
     }
 
-    .slot-label {
-        margin-bottom: 0 !important;
-        display: inline-block !important;
-        width: 90px;
-    }
-
-    .slot-occupied-zone {
-        margin-top: 0 !important;
-        flex-grow: 1;
-        text-align: right;
+    /* Prevents the recipe text badge from overflowing or clipping */
+    .recipe-card.badge {
+        font-size: 0.65rem !important;
+        padding: 0.4rem !important;
     }
 }
