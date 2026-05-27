@@ -48,7 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
         card.addEventListener("dragstart", (e) => {
             const targetCard = e.target.closest(".recipe-card");
             if (targetCard) {
-                const recipeTitle = targetCard.querySelector("strong")?.innerText || "Selected Recipe";
+                let recipeTitle = targetCard.querySelector("strong")?.innerText || "Selected Recipe";
+
+                // Escape quote characters to prevent HTML string breakdown during injection
+                recipeTitle = recipeTitle
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
             
                 e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
                 e.dataTransfer.setData("text/title", recipeTitle); 
