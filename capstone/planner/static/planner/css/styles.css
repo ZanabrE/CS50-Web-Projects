@@ -20,6 +20,7 @@ body {
 .card {
     background: rgba(255, 255, 255, 0.75) !important;
     border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(10px);
 }
 
 /* Make individual day columns float cleanly over the base background canvas */
@@ -42,17 +43,38 @@ body {
     background: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Draggable Cards - Sharp, crisp containers to contrast against the blurred backdrop */
+/* RESTORED: Baseline execution rules for draggable cards */
 .recipe-card {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+/* Sharp, crisp containers to contrast sidebar elements against the blurred backdrop */
+#recipe-pool .recipe-card {
     background-color: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
+    color: #0F172A !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+#recipe-pool .recipe-card strong {
+    color: #0F172A !important;
+}
+
+/* Fades out the recipe card while it is being actively dragged */
+.recipe-card.dragging {
+    opacity: 0.4 !important;
+    transform: scale(0.96);
+    border: 2px dashed #0d6efd !important;
 }
 
 /* Target Drag Drop Zones */
 .meal-slot {
     background-color: rgba(247, 250, 252, 0.6) !important;
     border: 2px dashed #cbd5e0 !important;
+    transition: all 0.2s ease-in-out;
 }
 
 .meal-slot.drag-hover {
@@ -60,6 +82,19 @@ body {
     border-color: #38BDF8 !important;
 }
 
+/* Clean segregation layer forces high contrast styles onto your dropped matrix badges */
+.meal-slot .recipe-card.badge {
+    background-color: #0d6efd !important; /* Pure high contrast Bootstrap corporate blue background */
+    color: #ffffff !important;            /* Pure readable white text styling */
+    border: none !important;              /* Wipes away sidebar gray borders layout lines */
+    box-shadow: 0 4px 6px -1px rgba(13, 110, 253, 0.2);
+    display: flex !important;              /* Forces correct inner visibility parameters */
+}
+
+/* Ensures bold item structures inside dropped calendar badges stay bright white */
+.meal-slot .recipe-card.badge strong {
+    color: #ffffff !important;
+}
 
 /* =========================================================================
    3. METRIC PROGRESS TRACKERS & MODAL DIALOG OVERLAYS
