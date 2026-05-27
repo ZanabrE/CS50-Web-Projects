@@ -44,25 +44,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const attachDragListeners = (card) => {
-        card.addEventListener("dragstart", (e) => {
-            const targetCard = e.target.closest(".recipe-card");
-            if (targetCard) {
-                e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
-                targetCard.classList.add("dragging");
+        const attachDragListeners = (card) => {
+            card.addEventListener("dragstart", (e) => {
+                const targetCard = e.target.closest(".recipe-card");
+                if (targetCard) {
+                    const recipeTitle = targetCard.querySelector("strong")?.innerText || "Selected Recipe";
                 
-                const sourceSlot = targetCard.closest(".meal-slot");
-                if (sourceSlot) {
-                    sourceSlot.setAttribute("data-dragging-source", "true");
+                    // FIXED: Send macro data straight through the drag payload 
+                    e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
+                    e.dataTransfer.setData("text/title", recipeTitle); 
+                    e.dataTransfer.setData("text/calories", targetCard.dataset.calories || "0");
+                    e.dataTransfer.setData("text/protein", targetCard.dataset.protein || "0");
+                
+                    targetCard.classList.add("dragging");
+                
+                    const sourceSlot = targetCard.closest(".meal-slot");
+                    if (sourceSlot) {
+                        sourceSlot.setAttribute("data-dragging-source", "true");
+                    }
                 }
-            }
-        });
+            });
 
-        card.addEventListener("dragend", (e) => {
-            const targetCard = e.target.closest(".recipe-card");
-            if (targetCard) {
-                targetCard.classList.remove("dragging");
-            }
+            card.addEventListener("dragend", (e) => {
+                const targetCard = e.target.closest(".recipe-card");
+                if (targetCard) {
+                    targetCard.classList.remove("dragging");
+                }
             document.querySelectorAll("[data-dragging-source]").forEach(el => el.removeAttribute("data-dragging-source"));
         });
     };
@@ -108,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // FIXED: Seamless layout target row delegation bindings
+    // Seamless layout target row delegation bindings
     dayColumns.forEach(column => {
         column.addEventListener("click", () => {
             calculateAndRenderDayMacros(column);
@@ -126,8 +133,13 @@ document.addEventListener("DOMContentLoaded", () => {
         slot.addEventListener("drop", async (e) => {
             e.preventDefault();
             slot.classList.remove("drag-hover");
-
+            
+            // Extract values directly from the drag payload event data transfer stream
             const recipeId = e.dataTransfer.getData("text/plain");
+            const recipeTitle = e.dataTransfer.getData("text/title"); 
+            const newCals = parseFloat(e.dataTransfer.getData("text/calories")) || 0;
+            const newProt = parseFloat(e.dataTransfer.getData("text/protein")) || 0;
+
             const parentColumn = slot.closest(".calendar-day-column");
             const targetDay = parentColumn?.dataset.dayCode;
             const mealType = slot.dataset.mealType;
@@ -145,59 +157,51 @@ document.addEventListener("DOMContentLoaded", () => {
                     const data = await response.json();
 
                     if (response.ok && data.status === "success") {
-                        const originCard = document.querySelector(`.recipe-card[data-recipe-id="${recipeId}"]`);
-                        
-                        if (originCard) {
-                            const newCals = parseFloat(originCard.dataset.calories) || 0;
-                            const newProt = parseFloat(originCard.dataset.protein) || 0;
-                            const recipeTitle = originCard.querySelector("strong")?.innerText || "Selected Recipe";
-
-                            if (sourceSlot && sourceSlot !== slot) {
-                                const sourceColumn = sourceSlot.closest(".calendar-day-column");
-                                
-                                await fetch("/api/calendar/move/", {
-                                    method: "PUT",
-                                    headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-                                    body: JSON.stringify({ plan_id: null, new_date: sourceColumn.dataset.dayCode, meal_type: sourceSlot.dataset.mealType })
-                                });
-
-                                sourceSlot.dataset.currentCalories = 0;
-                                sourceSlot.dataset.currentProtein = 0;
-                                const oldZone = sourceSlot.querySelector(".slot-occupied-zone");
-                                if (oldZone) oldZone.innerHTML = "";
-                                calculateAndRenderDayMacros(sourceColumn);
-                            }
-
-                            slot.dataset.currentCalories = newCals;
-                            slot.dataset.currentProtein = newProt;
-
-                            const occupiedZone = slot.querySelector(".slot-occupied-zone");
-                            if (occupiedZone) {
-                                occupiedZone.innerHTML = `
-                                    <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
-                                        draggable="true" 
-                                        data-recipe-id="${recipeId}"
-                                        data-calories="${newCals}"
-                                        data-protein="${newProt}"
-                                        style="cursor: grab; font-size: 0.7rem;">
-                                        <strong class="text-white">${recipeTitle}</strong>
-                                        <button type="button" class="btn-close btn-close-white remove-meal-btn" 
-                                                aria-label="Remove" 
-                                                style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
-                                    </span>
-                                `;
-                                
-                                const newlyAddedBadge = occupiedZone.querySelector(".recipe-card");
-                                attachDragListeners(newlyAddedBadge);
-                            }
+                        if (sourceSlot && sourceSlot !== slot) {
+                            const sourceColumn = sourceSlot.closest(".calendar-day-column");
                             
-                            calculateAndRenderDayMacros(parentColumn);
+                            await fetch("/api/calendar/move/", {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
+                                body: JSON.stringify({ plan_id: null, new_date: sourceColumn.dataset.dayCode, meal_type: sourceSlot.dataset.mealType })
+                            });
+
+                            sourceSlot.dataset.currentCalories = 0;
+                            sourceSlot.dataset.currentProtein = 0;
+                            const oldZone = sourceSlot.querySelector(".slot-occupied-zone");
+                            if (oldZone) oldZone.innerHTML = "";
+                            calculateAndRenderDayMacros(sourceColumn);
                         }
+
+                        slot.dataset.currentCalories = newCals;
+                        slot.dataset.currentProtein = newProt;
+
+                        const occupiedZone = slot.querySelector(".slot-occupied-zone");
+                        if (occupiedZone) {
+                            occupiedZone.innerHTML = `
+                                <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
+                                    draggable="true" 
+                                    data-recipe-id="${recipeId}"
+                                    data-calories="${newCals}"
+                                    data-protein="${newProt}"
+                                    style="cursor: grab; font-size: 0.7rem;">
+                                    <strong class="text-white">${recipeTitle}</strong>
+                                    <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                                            aria-label="Remove" 
+                                            style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
+                                </span>
+                            `;
+                            
+                            const newlyAddedBadge = occupiedZone.querySelector(".recipe-card");
+                            attachDragListeners(newlyAddedBadge);
+                        }
+                        
+                        calculateAndRenderDayMacros(parentColumn);
                     }
                 } catch (error) {
                     console.error("Drop placement sync anomaly:", error);
                 }
             }
-        });
+        }); 
     });
 });
