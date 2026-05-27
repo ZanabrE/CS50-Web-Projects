@@ -132,7 +132,7 @@ def dashboard_view(request):
             })
             
     # Sort recommendations: highest matching percentages first
-    recommended_recipes.sort(key=lambda x: x["match_percentage"], reverse=True)
+    recommended_recipes = get_recommended_recipes(request.user)
         
     # Configuration structure for structural frontend calendar template loops
     calendar_days = [
@@ -181,7 +181,9 @@ def dashboard_view(request):
         "today": today,
         "calendar_days": calendar_days,  
         "saved_meals": saved_meals,
-        "daily_macros": daily_macros, 
+        "daily_macros": daily_macros,
+        "mon_cals": daily_macros["MON"]["calories"],
+        "mon_prot": daily_macros["MON"]["protein"],
     }
     
     return render(request, "planner/index.html", context) 
