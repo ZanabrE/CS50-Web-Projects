@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const recipeCards = document.querySelectorAll(".recipe-card");
     const mealSlots = document.querySelectorAll(".meal-slot");
     const dayColumns = document.querySelectorAll(".calendar-day-column");
+    const labelText = document.getElementById("active-day-tracker-label");  // Added null check for labelText to prevent reference errors if element is absent
 
     const getCsrfToken = () => {
         const tokenFromDom = document.getElementById("csrf-token")?.value;
@@ -31,13 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
             protBar.value = dayTotalProt;
             if (calsText) calsText.innerText = `${dayTotalCals} / 2000 kcal`;
             if (protText) protText.innerText = `${dayTotalProt} / 150g`;
+            // FIXED: Shielded from reference errors if element is absent
             if (labelText && dayColumnElement.dataset.dayName) {
                 labelText.innerText = `Selected: ${dayColumnElement.dataset.dayName}`;
             }
         }
     };
 
-    // Initialize listeners for draggable elements dynamically
     const attachDragListeners = (card) => {
         card.addEventListener("dragstart", (e) => {
             const targetCard = e.target.closest(".recipe-card");
@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.dataTransfer.setData("text/plain", targetCard.dataset.recipeId);
                 targetCard.classList.add("dragging");
                 
-                // Track where the card is being dragged FROM (for re-scheduling swaps)
                 const sourceSlot = targetCard.closest(".meal-slot");
                 if (sourceSlot) {
                     sourceSlot.setAttribute("data-dragging-source", "true");
@@ -58,12 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (targetCard) {
                 targetCard.classList.remove("dragging");
             }
-            // Clear out source markers
             document.querySelectorAll("[data-dragging-source]").forEach(el => el.removeAttribute("data-dragging-source"));
         });
     };
 
-    // Core removal script processor logic function
     const handleMealRemoval = async (buttonElement) => {
         const badge = buttonElement.closest(".recipe-card");
         const slot = badge.closest(".meal-slot");
@@ -82,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const data = await response.json();
                 if (response.ok && data.status === "success") {
-                    // Reset node parameters and clear layout space
                     slot.dataset.currentCalories = 0;
                     slot.dataset.currentProtein = 0;
                     const occupiedZone = slot.querySelector(".slot-occupied-zone");
@@ -96,10 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Attach listener hooks to all baseline elements on load
+    // Initialize drag properties for baseline cards
     document.querySelectorAll(".recipe-card").forEach(card => attachDragListeners(card));
 
-    // Handle delete button click delegation
     document.addEventListener("click", (e) => {
         if (e.target.classList.contains("remove-meal-btn")) {
             e.stopPropagation();
@@ -128,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const targetDay = parentColumn?.dataset.dayCode;
             const mealType = slot.dataset.mealType;
             const csrfToken = getCsrfToken();
-
             const sourceSlot = document.querySelector("[data-dragging-source]");
 
             if (recipeId && targetDay && csrfToken) {
@@ -136,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const response = await fetch("/api/calendar/move/", {
                         method: "PUT",
                         headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-                        body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
+                    	body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
                     });
 
                     const data = await response.json();
@@ -149,11 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             const newProt = parseFloat(originCard.dataset.protein) || 0;
                             const recipeTitle = originCard.querySelector('strong')?.innerText || "Selected Recipe";
 
-                            // If this was moved from an old slot, clear out the old slot backend/frontend properties
                             if (sourceSlot && sourceSlot !== slot) {
                                 const sourceColumn = sourceSlot.closest(".calendar-day-column");
                                 
-                                // Cleanly clear out database record asynchronously for the old slot
                                 await fetch("/api/calendar/move/", {
                                     method: "PUT",
                                     headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
@@ -167,53 +159,39 @@ document.addEventListener("DOMContentLoaded", () => {
                                 calculateAndRenderDayMacros(sourceColumn);
                             }
 
-                            // Update new slot values
+                            // Update properties
                             slot.dataset.currentCalories = newCals;
                             slot.dataset.currentProtein = newProt;
 
-                            // FIXED AND FULLY COMPLETED: Closed HTML template literals and attached dynamic drag hooks
+                            // FIXED & COMPLETED: Core markup generation engine to render elements into target slot
                             const occupiedZone = slot.querySelector(".slot-occupied-zone");
-                            const badgeHtml = `
-                                <div class="recipe-card badge bg-primary w-100 py-2 px-2 text-wrap d-flex justify-content-between align-items-center" 
-                                     draggable="true" 
-                                     data-recipe-id="${recipeId}" 
-                                     data-calories="${newCals}" 
-                                     data-protein="${newProt}"
-                                     style="cursor: move;">
-                                    <strong>${recipeTitle}</strong>
-                                    <button type="button" class="btn-close btn-close-white remove-meal-btn" 
-                                            style="font-size: 0.5rem; cursor: pointer;" aria-label="Remove"></button>
-                                </div>`;
-                            
                             if (occupiedZone) {
-                                occupiedZone.innerHTML = badgeHtml;
-                                // Automatically initialize drag capabilities on the freshly created badge element
-                                const newBadge = occupiedZone.querySelector(".recipe-card");
-                                if (newBadge) attachDragListeners(newBadge);
+                                occupiedZone.innerHTML = `
+                                    <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" 
+                                        draggable="true" 
+                                        data-recipe-id="${recipeId}"
+                                        data-calories="${newCals}"
+                                        data-protein="${newProt}"
+                                        style="cursor: grab; font-size: 0.7rem;">
+                                        <strong class="text-white">${recipeTitle}</strong>
+                                        <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                                                aria-label="Remove" 
+                                                style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
+                                    </span>
+                                `;
+                                
+                                // RE-ATTACH DRAG LISTENERS: Allows dynamically added elements to be dragged again
+                                const newlyAddedBadge = occupiedZone.querySelector(".recipe-card");
+                                attachDragListeners(newlyAddedBadge);
                             }
                             
                             calculateAndRenderDayMacros(parentColumn);
                         }
                     }
                 } catch (error) {
-                    console.error("Network sync error:", error);
+                    console.error("Drop placement sync anomaly:", error);
                 }
             }
         });
     });
-
-    // Control Optimization Dialog Modal System
-    const optimizerBtn = document.getElementById("run-optimizer-btn");
-    const closeBtn = document.getElementById("close-modal-btn");
-    const modal = document.getElementById("optimization-modal");
-
-    if (optimizerBtn && modal) {
-        optimizerBtn.addEventListener("click", (e) => { e.preventDefault(); modal.showModal(); });
-    }
-    if (closeBtn && modal) {
-        closeBtn.addEventListener("click", () => modal.close());
-    }
-
-    const mondayColumn = document.querySelector('[data-day-code="MON"]');
-    if (mondayColumn) calculateAndRenderDayMacros(mondayColumn);
 });
