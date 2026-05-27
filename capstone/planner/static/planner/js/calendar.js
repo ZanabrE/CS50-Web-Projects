@@ -1,16 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
     const mealSlots = document.querySelectorAll(".meal-slot");
     const dayColumns = document.querySelectorAll(".calendar-day-column");
-    const labelText = document.getElementById("active-day-tracker-label");  // Added null check for labelText to prevent reference errors if element is absent
+    
+    // Correctly grab the tracking text label element from the DOM tree hierarchy
+    const labelText = document.getElementById("active-day-tracker-label");
 
     const getCsrfToken = () => {
         const tokenFromDom = document.getElementById("csrf-token")?.value;
         if (tokenFromDom) return tokenFromDom;
-        const cookieValue = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
-        return cookieValue ? cookieValue.split('=')[1] : null;
+        const cookieValue = document.cookie.split("; ").find(row => row.startsWith("csrftoken="));
+        return cookieValue ? cookieValue.split("=")[1] : null;
     };
 
+    // Core macro calculation engine to process daily parameters dynamically
     const calculateAndRenderDayMacros = (dayColumnElement) => {
+        if (!dayColumnElement) return;
+
         const calsBar = document.getElementById("calories-progress");
         const protBar = document.getElementById("protein-progress");
         const calsText = document.getElementById("calories-text-value");
@@ -19,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let dayTotalCals = 0;
         let dayTotalProt = 0;
 
+        // Sum values across all slot blocks within the chosen day column wrapper framework
         dayColumnElement.querySelectorAll(".meal-slot").forEach(slot => {
             dayTotalCals += parseFloat(slot.dataset.currentCalories) || 0;
             dayTotalProt += parseFloat(slot.dataset.currentProtein) || 0;
@@ -26,15 +32,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dayTotalProt = parseFloat(dayTotalProt.toFixed(1));
 
-        if (calsBar && protBar) {
-            calsBar.value = dayTotalCals;
-            protBar.value = dayTotalProt;
-            if (calsText) calsText.innerText = `${dayTotalCals} / 2000 kcal`;
-            if (protText) protText.innerText = `${dayTotalProt} / 150g`;
-            // FIXED: Shielded from reference errors if element is absent
-            if (labelText && dayColumnElement.dataset.dayName) {
-                labelText.innerText = `Selected: ${dayColumnElement.dataset.dayName}`;
-            }
+        // Update the dashboard side track panel variables layout structures
+        if (calsBar) calsBar.value = dayTotalCals;
+        if (protBar) protBar.value = dayTotalProt;
+        if (calsText) calsText.innerText = `${dayTotalCals} / 2000 kcal`;
+        if (protText) protText.innerText = `${dayTotalProt} / 150g`;
+        
+        // FIXED: Safeguarded condition assignment block execution flow parameters
+        if (labelText && dayColumnElement.dataset.dayName) {
+            labelText.innerText = `Selected: ${dayColumnElement.dataset.dayName}`;
         }
     };
 
@@ -92,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Initialize drag properties for baseline cards
+    // Attach tracking properties to initial template layout markup
     document.querySelectorAll(".recipe-card").forEach(card => attachDragListeners(card));
 
     document.addEventListener("click", (e) => {
@@ -102,8 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // FIXED: Seamless layout target row delegation bindings
     dayColumns.forEach(column => {
-        column.addEventListener("click", () => calculateAndRenderDayMacros(column));
+        column.addEventListener("click", () => {
+            calculateAndRenderDayMacros(column);
+        });
     });
 
     mealSlots.forEach(slot => {
@@ -130,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const response = await fetch("/api/calendar/move/", {
                         method: "PUT",
                         headers: { "Content-Type": "application/json", "X-CSRFToken": csrfToken },
-                    	body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
+                        body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
                     });
 
                     const data = await response.json();
@@ -141,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (originCard) {
                             const newCals = parseFloat(originCard.dataset.calories) || 0;
                             const newProt = parseFloat(originCard.dataset.protein) || 0;
-                            const recipeTitle = originCard.querySelector('strong')?.innerText || "Selected Recipe";
+                            const recipeTitle = originCard.querySelector("strong")?.innerText || "Selected Recipe";
 
                             if (sourceSlot && sourceSlot !== slot) {
                                 const sourceColumn = sourceSlot.closest(".calendar-day-column");
@@ -159,11 +168,9 @@ document.addEventListener("DOMContentLoaded", () => {
                                 calculateAndRenderDayMacros(sourceColumn);
                             }
 
-                            // Update properties
                             slot.dataset.currentCalories = newCals;
                             slot.dataset.currentProtein = newProt;
 
-                            // FIXED & COMPLETED: Core markup generation engine to render elements into target slot
                             const occupiedZone = slot.querySelector(".slot-occupied-zone");
                             if (occupiedZone) {
                                 occupiedZone.innerHTML = `
@@ -180,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                     </span>
                                 `;
                                 
-                                // RE-ATTACH DRAG LISTENERS: Allows dynamically added elements to be dragged again
                                 const newlyAddedBadge = occupiedZone.querySelector(".recipe-card");
                                 attachDragListeners(newlyAddedBadge);
                             }
