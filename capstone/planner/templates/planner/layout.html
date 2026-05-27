@@ -56,8 +56,8 @@
         {% endblock %}
     </main>
 
-    <!-- Cloudflare link -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Loads Bootstrap safely offline from computer -->
+    <script src="{% static 'planner/js/bootstrap.local.js' %}"></script>
     
     <!-- Core interactive client script -->
     <script src="{% static 'planner/js/calendar.js' %}"></script>
