@@ -114,18 +114,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // --- MOBILE & TABLET TOUCH HANDLERS (WITH DYNAMIC AUTO-SCROLL ENGINE) ---
         card.addEventListener("touchstart", (e) => {
-            touchActiveCard = e.target.closest(".recipe-card");
-            if (!touchActiveCard) return;
+            if (e.target.classList.contains("remove-meal-btn")) return;
+            
+            const targetCard = e.target.closest(".recipe-card");
+            if (!targetCard) return;
 
+            // Clear previous highlight rings
+            document.querySelectorAll(".recipe-card").forEach(c => c.style.border = "none");
+
+            // Tapping code setup for tiny viewports: Highlight chosen item with a bold clean border
+            mobileSelectedCard = targetCard;
+            mobileSelectedCard.style.border = "2px solid #0d6efd";
+            
+            touchActiveCard = targetCard;
             touchSourceSlot = touchActiveCard.closest(".meal-slot");
             touchActiveCard.style.opacity = "0.6";
-            touchActiveCard.style.transform = "scale(0.95)";
-        }, { passive: true });
+        }, { passive: true }); // Keep start passive so initial taps are fast
 
         card.addEventListener("touchmove", (e) => {
             if (!touchActiveCard) return;
+            
+            // FIX 1: Stop the default browser window from scrolling so the item doesn't get left behind or stuck at the bottom
+            e.preventDefault(); 
 
-            // Target the FIRST finger pointer location specifically [0] to stop mobile crashes
+            // Extract the first active finger point coordinates
             const touch = e.touches[0];
             
             // Render floating preview badge right underneath the active finger tip location coordinates
@@ -136,23 +148,17 @@ document.addEventListener("DOMContentLoaded", () => {
             touchActiveCard.style.pointerEvents = "none";
 
             // Dynamic view scroll barriers parameters config settings
-            const scrollSensitivity = 60;
-            const scrollSpeed = 12;
+            const sens = 60, speed = 14;
             
             // Evaluates horizontal position rules to scroll background layouts cleanly during drift movements
-            if (touch.clientX > (window.innerWidth - scrollSensitivity)) {
-                window.scrollBy(scrollSpeed, 0);
-            } else if (touch.clientX < scrollSensitivity) {
-                window.scrollBy(-scrollSpeed, 0);
-            }
+            if (touch.clientX > (window.innerWidth - sens)) window.scrollBy(speed, 0);
+            else if (touch.clientX < sens) window.scrollBy(-speed, 0);
+            
+            // FIX 2: Smooth out vertical automatic page scrolling when dragging near top/bottom edges
+            if (touch.clientY > (window.innerHeight - sens)) window.scrollBy(0, speed);
+            else if (touch.clientY < sens) window.scrollBy(0, -speed);
+        }, { passive: false }); // VITAL FIX: passive:false allows e.preventDefault() to actually work!
 
-            // Evaluates vertical position parameters
-            if (touch.clientY > (window.innerHeight - scrollSensitivity)) {
-                window.scrollBy(0, scrollSpeed);
-            } else if (touch.clientY < scrollSensitivity) {
-                window.scrollBy(0, -scrollSpeed);
-            }
-        }, { passive: true });
 
         card.addEventListener("touchend", async (e) => {
             if (!touchActiveCard) return;
