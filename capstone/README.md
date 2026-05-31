@@ -110,5 +110,5 @@ Open your preferred browser window and navigate to `http://127.0.0.1:8000` to in
 
 * **Preconfigured Testing Profile:** The `seed_data.py` script automatically configures a default user account so you do not have to waste time registering profiles manually. You can log in instantly using the following test credentials:
   * **Username:** `testuser`
-  * **Password:** `password123`
+  * **Password:** `Password123!`
 * **Static Assets Note:** All custom files (`styles.css`, `calendar.js`, `pantry.js`, and `bootstrap.local.js`) are housed strictly within local static directories and managed safely using Django’s standard `staticfiles` discovery configuration.
