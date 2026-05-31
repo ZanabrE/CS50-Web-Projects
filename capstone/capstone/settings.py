@@ -86,15 +86,19 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        # Enforces a minimum length (e.g., 10 characters)
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
+        # Rejects passwords too similar to the username, email, or first name
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
+        # Rejects common passwords found in a dictionary list of 20,000 common passwords
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
+        # Rejects purely numeric passwords (e.g., "1234567890")
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
