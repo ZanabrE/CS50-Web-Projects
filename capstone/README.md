@@ -31,84 +31,75 @@ To help understand the architecture of this application, here is a breakdown of 
 
 ### Backend Python Architecture
 *   `config/settings.py`: Configures global project parameters, registers the modular core application, establishes secure media/static routing paths, and points the project toward the local SQLite database instance.
-*   `my_app/models.py`: Contains the object-relational mapping (ORM) abstractions for the application database. Defines `Ingredient` (tracking names and categories), `Recipe` (tracking instructions and prep times), `RecipeIngredient` (a custom join table establishing specific quantities/units per recipe), `PantryItem` (tracking user inventory, amounts, and expiration dates), and `MealPlan` (binding recipes to specific user accounts and calendar dates).
-*   `my_app/views.py`: Controls the application logic. Contains the user registration, login, and logout controller routines. Houses the primary analytical matching engine that loops through expiring pantry elements to filter valid recipe structures. Additionally, manages the RESTful JSON API endpoints that respond to frontend JavaScript requests.
-*   `my_app/urls.py`: Defines the routing matrix for the application. Maps the primary visual templates to their respective view controllers and organizes the dedicated API endpoints (e.g., `/api/pantry`, `/api/calendar/move`) used by the client-side scripts.
-*   `my_app/tests.py`: Implements automated test suites utilizing Django’s testing framework. Validates the mathematical accuracy of the recipe matching engine, ensures expiration warnings trigger under correct date thresholds, and verifies that the JSON API endpoints respond with accurate HTTP status codes under valid or invalid user states.
+*   `planner/models.py`: Contains the object-relational mapping (ORM) abstractions for the application database. Defines `Ingredient` (tracking names and categories), `Recipe` (tracking instructions and prep times), `RecipeIngredient` (a custom join table establishing specific quantities/units per recipe), `PantryItem` (tracking user inventory, amounts, and expiration dates), and `MealPlan` (binding recipes to specific user accounts and calendar dates).
+*   `planner/views.py`: Controls the application logic. Contains the user registration, login, and logout controller routines. Houses the primary analytical matching engine that loops through expiring pantry elements to filter valid recipe structures. Additionally, manages the RESTful JSON API endpoints that respond to frontend JavaScript requests.
+*   `planner/urls.py`: Defines the routing matrix for the application. Maps the primary visual templates to their respective view controllers and organizes the dedicated API endpoints (e.g., `/api/pantry`, `/api/calendar/move`) used by the client-side scripts.
+*   `planner/tests.py`: Implements automated test suites utilizing Django’s testing framework. Validates the mathematical accuracy of the recipe matching engine, ensures expiration warnings trigger under correct date thresholds, and verifies that the JSON API endpoints respond with accurate HTTP status codes under valid or invalid user states.
+*   `seed_data.py`: A database population utility script. It automatically interfaces with the Django ORM to generate dummy user accounts, preloaded ingredients, sample recipes, and baseline kitchen mock data, enabling testers to instantly view the software's data processing potential without manual data entry.
 
 ### Frontend JavaScript & CSS Engineering
-*   `static/js/calendar.js`: The primary engine driving the frontend experience. Manages HTML5 drag-and-drop event handlers (`dragstart`, `dragover`, `drop`). Collects item identifiers from DOM nodes during move events, transmits asynchronous `PUT` requests to the Django API, processes the JSON responses, and modifies the DOM to update visual nutrition counters on the fly. It also handles triggers for Bootstrap 5 interactive notification popovers and feedback modals.
-*   `static/js/pantry.js`: Orchestrates inventory interactions. Listens for ingredient submission forms, fires asynchronous `POST` operations to add items to the pantry, updates expiration warning styling dynamically using time differentials, and handles row removal animations when items are deleted.
-*   `static/css/styles.css`: Houses custom styling definitions that override Bootstrap 5 defaults. It implements specialized CSS Grid structures for the 7-day calendar view, establishes unique drag-and-drop visual states (e.g., hover indicators, drop-zone highlights), and uses custom media queries to force grid components into vertical column layouts on mobile screen sizes.
+*   `static/planner/js/bootstrap.local.js`: A custom, lightweight vanilla JavaScript layout initializer script built specifically for this project. To ensure high-speed, local reliability and eliminate bloated external web dependencies, this script handles the programmatic UI triggers, setup operations, and event bindings for dashboard alerts and visual state adjustments asynchronously.
+*   `static/planner/js/calendar.js`: The primary engine driving the frontend experience. Manages HTML5 drag-and-drop event handlers (`dragstart`, `dragover`, `drop`). Collects item identifiers from DOM nodes during move events, transmits asynchronous `PUT` requests to the Django API, processes the JSON responses, and modifies the DOM to update visual nutrition counters on the fly. It also handles triggers for Bootstrap 5 interactive notification popovers and feedback modals.
+*   `static/planner/js/pantry.js`: Orchestrates inventory interactions. Listens for ingredient submission forms, fires asynchronous `POST` operations to add items to the pantry, updates expiration warning styling dynamically using time differentials, and handles row removal animations when items are deleted.
+*   `static/planner/css/styles.css`: Houses custom styling definitions that override Bootstrap 5 defaults. It implements specialized CSS Grid structures for the 7-day calendar view, establishes unique drag-and-drop visual states (e.g., hover indicators, drop-zone highlights), and uses custom media queries to force grid components into vertical column layouts on mobile screen sizes.
 
 ### HTML5 UI Templates
-*   `templates/layout.html`: The base HTML5 structural framework. Integrates Bootstrap 5 via CDN for standardized base components, imports custom typography layers, and manages the global responsive navigation menu toggles.
-*   `templates/index.html`: The main user dashboard. Displays urgent expiration metrics using Bootstrap card elements, showcases top recipe recommendations generated by the matching engine, and renders the weekly interactive planning grid.
-*   `templates/pantry.html`: The ingredient configuration space. Renders an intuitive list view of current kitchen assets alongside Bootstrap form groups to add ingredients, adjust inventory levels, and manually track item conditions.
-*   `templates/login.html` & `register.html`: Secure, clean authentication interfaces styled with interactive Bootstrap focus utilities and custom CSS focus animations to onboard users into their private workspaces.
+*   `templates/planner/layout.html`: The base HTML5 structural framework. Integrates Bootstrap 5 via CDN for standardized base components, imports custom typography layers, and manages the global responsive navigation menu toggles.
+*   `templates/planner/index.html`: The main user dashboard. Displays urgent expiration metrics using Bootstrap card elements, showcases top recipe recommendations generated by the matching engine, and renders the weekly interactive planning grid.
+*   `templates/planner/pantry.html`: The ingredient configuration space. Renders an intuitive list view of current kitchen assets alongside Bootstrap form groups to add ingredients, adjust inventory levels, and manually track item conditions.
+*   `templates/planner/login.html` & `register.html`: Secure, clean authentication interfaces styled with interactive Bootstrap focus utilities and custom CSS focus animations to onboard users into their private workspaces.
 
 ---
 
 ## Project Setup and Execution Instructions
 
-Follow these steps to set up, initialize, and run the Django project locally from scratch.
+Follow these precise steps to clone, configure, initialize, and execute the application locally from a clean terminal window environment.
 
-### 1. Initialize Your Project Directory
-Create a dedicated folder for your project and navigate inside it:
+### 1. Clone and Navigate to the Project Root Folder
+Clone your project repository from your code hosting provider, and navigate directly into the root workspace folder containing your `manage.py` and `seed_data.py` files:
 ```bash
-mkdir my_django_project
-cd my_django_project
+git clone <your-repository-url-here>
+cd capstone
 ```
 
 ### 2. Set Up a Virtual Environment
-Isolate your project dependencies from your global system environment:
-*   **macOS / Linux:**
-    ```bash
-    python3 -m venv my_project_env
-    source my_project_env/bin/activate
-    ```
-*   **Windows (Command Prompt):**
-    ```bash
-    python -m venv my_project_env
-    my_project_env\Scripts\
-    ```
+Isolate the project dependencies from your global system environment variables:
+* **macOS / Linux:**
+  ```bash
+  python3 -m venv my_project_env
+  source my_project_env/bin/activate
+  ```
+* **Windows (Command Prompt):**
+  ```cmd
+  python -m venv my_project_env
+  my_project_env\Scripts\activate.bat
+  ```
 
-### 3. Install Django
-Upgrade `pip` and install the Django framework environment:
+### 3. Install Required Dependencies
+Upgrade your internal library management system installer and run the project prerequisite configurations:
 ```bash
 python -m pip install --upgrade pip
-python -m pip install django
+python -m pip install -r requirements.txt
 ```
-*Note: The frontend layouts utilize Bootstrap 5 via CDN integration, which requires an active internet connection to download styling libraries and icons during runtime execution.*
+*Note: The frontend layouts utilize a localized Bootstrap 5 architecture served directly from the project's internal asset directories (planner/static/planner/js). An active internet connection is NOT required during runtime execution, ensuring ultra-fast loading times and total offline reliability.
 
-### 4. Create the Django Project Configuration
-Generate the boilerplate structural configuration files. The trailing dot (`.`) ensures the script initializes files right within your main folder without creating an unnecessary nested root directory:
+### 4. Apply Database Migrations
+Initialize the system architecture and construct the foundational structural database tables designed inside your core database models:
 ```bash
-django-admin startproject config .
-```
-
-### 5. Run Initial Database Migrations
-Initialize the default local SQLite core system database tables:
-```bash
+python manage.py makemigrations planner
 python manage.py migrate
 ```
 
-### 6. Start the Development Server
-Launch Django's built-in local background web server:
+### 5. Seed the Application Database (Crucial Step)
+To experience the application immediately with predefined assets without having to manually type in entries, execute the database seeding utility script:
+```bash
+python seed_data.py
+```
+*Note: This script will run seamlessly from the root folder directory and inject testing data directly into your local `db.sqlite3` framework.*
+
+### 6. Launch the Local Development Web Server
+Boot up Django's internal system development server environment:
 ```bash
 python manage.py runserver
 ```
-*Navigate to `http://127.0.0.1:8000` in your web browser to confirm the initial interface builds successfully.*
-
-### 7. Pin Project Dependencies
-Save your currently active library setup to a flat text file configuration layout for deployment standards:
-```bash
-python -m pip freeze > requirements.txt
-```
-
-### 8. Create Your Modular Feature Application
-Generate your custom modular data application components within the directory block:
-```bash
-python manage.py startapp my_app
-```
-*Note: To complete the backend integration, remember to add your newly initialized application directory string (`'my_app'`) to the global `INSTALLED_APPS` cluster array located inside your `config/settings.py` file.*
+Open your preferred browser window and navigate to `http://127.0.0.1:8000` to interact directly with the Smart Meal Planner dashboard interface.
