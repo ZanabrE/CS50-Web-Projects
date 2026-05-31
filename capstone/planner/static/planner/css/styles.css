@@ -131,27 +131,83 @@ dialog#optimization-modal::backdrop {
 }
 
 /* =========================================================================
-   4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
-   ========================================================================= */
-@media (max-width: 1199px) {
+4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
+========================================================================= */
+/* Tablet and Small Screen Intermediate Layout Engine Settings */
+@media (max-width: 1199px) and (min-width: 992px) {
     .calendar-grid {
         display: grid !important;
-        grid-template-columns: repeat(7, minmax(130px, 1fr)) !important;
+        grid-template-columns: repeat(7, minmax(110px, 1fr)) !important;
         overflow-x: auto !important;
         padding-bottom: 10px;
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
     }
-
-    /* SAFE MOBILE CELL STYLING: Keeps items stacked vertically inside the grid columns */
+    
     .meal-slot {
         min-height: 80px !important;
         padding: 0.5rem !important;
     }
 
-    /* Prevents the recipe text badge from overflowing or clipping */
     .recipe-card.badge {
         font-size: 0.65rem !important;
         padding: 0.4rem !important;
+    }
+}
+
+/* Complete Mobile & Tablet Breakpoint Transformation Logic (991px and down) */
+@media (max-width: 991px) {
+    /* Collapses the grid layout completely to prevent touch overflow bugs */
+    .calendar-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        width: 100% !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Expands day columns to stack cleanly down the viewport canvas */
+    .calendar-day-column {
+        width: 100% !important;
+        margin-bottom: 5px !important;
+        display: block !important;
+    }
+
+    /* SAFE MOBILE CELL STYLING: Vertically lines up meal blocks inside the expanded day tracking grid */
+    .meal-slot {
+        min-height: 70px !important;
+        padding: 0.6rem !important;
+        margin-top: 5px !important;
+    }
+
+    /* Resizes layout parameters inside dropped recipe badges for quick mobile touch visibility */
+    .recipe-card.badge {
+        font-size: 0.75rem !important;
+        padding: 0.5rem !important;
+    }
+
+    /* Targets the inner formatting structure wrapper inside the optimizer dialogue overlay */
+    dialog#optimization-modal {
+        width: 95% !important;
+        padding: 15px !important;
+    }
+
+    /* Centers structural text labels, buttons, and close inputs inside modal box overlays */
+    dialog#optimization-modal .modal-content-wrapper,
+    dialog#optimization-modal div {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    /* Target the button triggers explicitly to center them beautifully inside phone workspaces */
+    #run-optimizer-btn,
+    .optimizer-trigger-button {
+        display: block !important;
+        margin: 15px auto !important; /* Centers button horizontally inside layout row containers */
+        text-align: center !important;
+        width: 85% !important; /* Maximizes thumb real estate target size across touch devices */
+        max-width: 320px !important;
     }
 }
