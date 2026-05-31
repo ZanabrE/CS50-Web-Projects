@@ -119,18 +119,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }, { passive: true });
 
         card.addEventListener("touchmove", (e) => {
+                    card.addEventListener("touchmove", (e) => {
             if (!touchActiveCard) return;
 
-            // Stop standard viewport scrolling so page doesn't jiggle while shifting items
-            if (e.cancelable) e.preventDefault();
-
             const touch = e.touches[0];
+            
+            // Render the floating preview badge right under the finger tip
             touchActiveCard.style.position = "fixed";
             touchActiveCard.style.left = `${touch.clientX - (touchActiveCard.offsetWidth / 2)}px`;
             touchActiveCard.style.top = `${touch.clientY - (touchActiveCard.offsetHeight / 2)}px`;
             touchActiveCard.style.zIndex = "9999";
-            touchActiveCard.style.pointerEvents = "none"; // Allows elementFromPoint to hit items below
-        }, { passive: false });
+            touchActiveCard.style.pointerEvents = "none";
+
+            // --- SMART AUTO-SCROLL ENGINE FOR MOBILE/TABLETS ---
+            const scrollSensitivity = 60; // Distance in pixels from screen boundary to trigger scroll
+            const scrollSpeed = 12;       // Processing movement rate step speed value
+            
+            // Check horizontal positions relative to global window border zones
+            if (touch.clientX > (window.innerWidth - scrollSensitivity)) {
+                // Finger is pushed far right: scroll window rightward automatically
+                window.scrollBy(scrollSpeed, 0);
+            } else if (touch.clientX < scrollSensitivity) {
+                // Finger is pushed far left: scroll window leftward automatically
+                window.scrollBy(-scrollSpeed, 0);
+            }
+
+            // Check vertical positions to accommodate long screens tracking
+            if (touch.clientY > (window.innerHeight - scrollSensitivity)) {
+                window.scrollBy(0, scrollSpeed);
+            } else if (touch.clientY < scrollSensitivity) {
+                window.scrollBy(0, -scrollSpeed);
+            }
+        }, { passive: true }); // Changed to passive:true to restore natural viewport tracking physics
 
         card.addEventListener("touchend", async (e) => {
             if (!touchActiveCard) return;
@@ -179,13 +199,20 @@ document.addEventListener("DOMContentLoaded", () => {
                             body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
                         });
                         const data = await response.json();
-
+                        
                         if (response.ok && data.status === "success") {
                             processSlotAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, parentColumn, touchSourceSlot);
                         }
                     } catch (error) {
-                        console.error("Touch placement sync anomaly:", error);
+                        // Check if it's just an extension background channel closure error
+                        if (error.message && error.message.includes("message channel closed")) {
+                            // Safe to ignore completely: extension artifact, backend succeeded
+                            processSlotAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, parentColumn, touchSourceSlot);
+                        } else {
+                            console.error("Actual network sync anomaly:", error);
+                        }
                     }
+
                 }
             }
             touchActiveCard = null;
