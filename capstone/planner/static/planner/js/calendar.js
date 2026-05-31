@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // SECURITY GUARD: If calendar elements don't exist on this screen, stop executing instantly
+        // SECURITY GUARD: If calendar elements don't exist on this screen, stop executing instantly
     if (!document.querySelector(".calendar-day-column")) {
         return;
     }
@@ -55,13 +55,16 @@ document.addEventListener("DOMContentLoaded", () => {
             sourceSlot.dataset.currentCalories = 0;
             sourceSlot.dataset.currentProtein = 0;
             const oldZone = sourceSlot.querySelector(".slot-occupied-zone");
+            
             if (oldZone) oldZone.innerHTML = "";
             calculateAndRenderDayMacros(sourceColumn);
         }
 
         slot.dataset.currentCalories = newCals;
         slot.dataset.currentProtein = newProt;
+        
         const occupiedZone = slot.querySelector(".slot-occupied-zone");
+        
         if (occupiedZone) {
             occupiedZone.innerHTML = `
                 <span class="recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center" draggable="true" data-recipe-id="${recipeId}" data-calories="${newCals}" data-protein="${newProt}" style="cursor: grab; font-size: 0.7rem;">
@@ -70,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </span>
             `;
             const newlyAddedBadge = occupiedZone.querySelector(".recipe-card");
-            attachDragListeners(newlyAddedBadge);
+            attachDragListeners(newlyAddedBadge); // Re-binds listeners to the fresh DOM card
         }
         calculateAndRenderDayMacros(parentColumn);
     };
@@ -105,10 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (targetCard) {
                 targetCard.classList.remove("dragging");
             }
+            
             document.querySelectorAll("[data-dragging-source]").forEach(el => el.removeAttribute("data-dragging-source"));
         });
 
-        // --- MOBILE & TABLET TOUCH HANDLERS ---
+        // --- MOBILE & TABLET TOUCH HANDLERS (WITH DYNAMIC AUTO-SCROLL ENGINE) ---
         card.addEventListener("touchstart", (e) => {
             touchActiveCard = e.target.closest(".recipe-card");
             if (!touchActiveCard) return;
@@ -119,38 +123,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }, { passive: true });
 
         card.addEventListener("touchmove", (e) => {
-            card.addEventListener("touchmove", (e) => {
-                if (!touchActiveCard) return;
-                
-                const touch = e.touches[0];
-            
-                // Render the floating preview badge right under the finger tip
-                touchActiveCard.style.position = "fixed";
-                touchActiveCard.style.left = `${touch.clientX - (touchActiveCard.offsetWidth / 2)}px`;
-                touchActiveCard.style.top = `${touch.clientY - (touchActiveCard.offsetHeight / 2)}px`;
-                touchActiveCard.style.zIndex = "9999";
-                touchActiveCard.style.pointerEvents = "none";
+            if (!touchActiveCard) return;
 
-                // --- SMART AUTO-SCROLL ENGINE FOR MOBILE/TABLETS ---
-                const scrollSensitivity = 60; // Distance in pixels from screen boundary to trigger scroll
-                const scrollSpeed = 12;       // Processing movement rate step speed value
+            // Target the FIRST finger pointer location specifically [0] to stop mobile crashes
+            const touch = e.touches[0];
             
-                // Check horizontal positions relative to global window border zones
-                if (touch.clientX > (window.innerWidth - scrollSensitivity)) {
-                    // Finger is pushed far right: scroll window rightward automatically
-                    window.scrollBy(scrollSpeed, 0);
-                } else if (touch.clientX < scrollSensitivity) {
-                    // Finger is pushed far left: scroll window leftward automatically
-                    window.scrollBy(-scrollSpeed, 0);
-                }
+            // Render floating preview badge right underneath the active finger tip location coordinates
+            touchActiveCard.style.position = "fixed";
+            touchActiveCard.style.left = `${touch.clientX - (touchActiveCard.offsetWidth / 2)}px`;
+            touchActiveCard.style.top = `${touch.clientY - (touchActiveCard.offsetHeight / 2)}px`;
+            touchActiveCard.style.zIndex = "9999";
+            touchActiveCard.style.pointerEvents = "none";
 
-                // Check vertical positions to accommodate long screens tracking
-                if (touch.clientY > (window.innerHeight - scrollSensitivity)) {
-                    window.scrollBy(0, scrollSpeed);
-                } else if (touch.clientY < scrollSensitivity) {
-                    window.scrollBy(0, -scrollSpeed);
-                }
-            }, { passive: true }); // Changed to passive:true to restore natural viewport tracking physics
+            // Dynamic view scroll barriers parameters config settings
+            const scrollSensitivity = 60;
+            const scrollSpeed = 12;
+            
+            // Evaluates horizontal position rules to scroll background layouts cleanly during drift movements
+            if (touch.clientX > (window.innerWidth - scrollSensitivity)) {
+                window.scrollBy(scrollSpeed, 0);
+            } else if (touch.clientX < scrollSensitivity) {
+                window.scrollBy(-scrollSpeed, 0);
+            }
+
+            // Evaluates vertical position parameters
+            if (touch.clientY > (window.innerHeight - scrollSensitivity)) {
+                window.scrollBy(0, scrollSpeed);
+            } else if (touch.clientY < scrollSensitivity) {
+                window.scrollBy(0, -scrollSpeed);
+            }
+        }, { passive: true });
 
         card.addEventListener("touchend", async (e) => {
             if (!touchActiveCard) return;
@@ -161,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
             touchActiveCard.style.zIndex = "auto";
             touchActiveCard.style.pointerEvents = "auto";
 
+            // Extract position parameters from the exact finger release index point
             const touch = e.changedTouches[0];
             const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
             const targetSlot = dropTarget ? dropTarget.closest(".meal-slot") : null;
@@ -198,27 +201,42 @@ document.addEventListener("DOMContentLoaded", () => {
                             },
                             body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
                         });
+                        
                         const data = await response.json();
                         
                         if (response.ok && data.status === "success") {
-                            processSlotAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, parentColumn, touchSourceSlot);
+                            processSlotAssignment(
+                                targetSlot, 
+                                recipeId, 
+                                recipeTitle, 
+                                newCals, 
+                                newProt, 
+                                parentColumn, 
+                                touchSourceSlot
+                            );
                         }
                     } catch (error) {
-                        // Check if it's just an extension background channel closure error
                         if (error.message && error.message.includes("message channel closed")) {
-                            // Safe to ignore completely: extension artifact, backend succeeded
-                            processSlotAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, parentColumn, touchSourceSlot);
+                            processSlotAssignment(
+                                targetSlot, 
+                                recipeId, 
+                                recipeTitle, 
+                                newCals, 
+                                newProt, 
+                                parentColumn, 
+                                touchSourceSlot
+                            );
                         } else {
-                            console.error("Actual network sync anomaly:", error);
+                            console.error("Touch placement sync anomaly:", error);
                         }
                     }
-
                 }
             }
+            
             touchActiveCard = null;
             touchSourceSlot = null;
         });
-    });
+    };
 
     const handleMealRemoval = async (buttonElement) => {
         const badge = buttonElement.closest(".recipe-card");
@@ -227,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetDay = parentColumn?.dataset.dayCode;
         const mealType = slot.dataset.mealType;
         const csrfToken = getCsrfToken();
-
+        
         if (targetDay && mealType && csrfToken) {
             try {
                 const response = await fetch("/api/calendar/move/", {
@@ -236,14 +254,21 @@ document.addEventListener("DOMContentLoaded", () => {
                         "Content-Type": "application/json",
                         "X-CSRFToken": csrfToken
                     },
-                    body: JSON.stringify({ plan_id: null, new_date: targetDay, meal_type: mealType })
+                    body: JSON.stringify({ 
+                        plan_id: null, 
+                        new_date: targetDay, 
+                        meal_type: mealType 
+                    })
                 });
+                
                 const data = await response.json();
-
+                
                 if (response.ok && data.status === "success") {
                     slot.dataset.currentCalories = 0;
                     slot.dataset.currentProtein = 0;
+                    
                     const occupiedZone = slot.querySelector(".slot-occupied-zone");
+                    
                     if (occupiedZone) occupiedZone.innerHTML = "";
                     calculateAndRenderDayMacros(parentColumn);
                 }
@@ -253,54 +278,56 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    // Initialize all existing cards on dashboard layout load
     document.querySelectorAll(".recipe-card").forEach(card => attachDragListeners(card));
-
+    
     document.addEventListener("click", (e) => {
         if (e.target.classList.contains("remove-meal-btn")) {
-            e.stopPropagation();
-            handleMealRemoval(e.target);
+            e.stopPropagation();handleMealRemoval(e.target);
         }
     });
 
+    // RESTORED: Click event configuration listener to update metrics view on desktop columns selection
     dayColumns.forEach(column => {
         column.addEventListener("click", () => {
             calculateAndRenderDayMacros(column);
         });
     });
 
+    // Desktop Drag Drop Listeners
     mealSlots.forEach(slot => {
         slot.addEventListener("dragover", (e) => {
             e.preventDefault();
             slot.classList.add("drag-hover");
         });
-
+        
         slot.addEventListener("dragleave", () => slot.classList.remove("drag-hover"));
-
+        
         slot.addEventListener("drop", async (e) => {
             e.preventDefault();
             slot.classList.remove("drag-hover");
-
+            
             const recipeId = e.dataTransfer.getData("text/plain");
             const recipeTitle = e.dataTransfer.getData("text/title");
             const newCals = parseFloat(e.dataTransfer.getData("text/calories")) || 0;
             const newProt = parseFloat(e.dataTransfer.getData("text/protein")) || 0;
-
+            
             const parentColumn = slot.closest(".calendar-day-column");
             const targetDay = parentColumn?.dataset.dayCode;
             const dayName = parentColumn?.dataset.dayName || "this day";
             const mealType = slot.dataset.mealType;
             const csrfToken = getCsrfToken();
             const sourceSlot = document.querySelector("[data-dragging-source]");
-
+            
             if (recipeId && targetDay && csrfToken) {
                 const isDuplicate = Array.from(parentColumn.querySelectorAll(".recipe-card"))
-                    .some(card => card.dataset.recipeId === recipeId && card.closest(".meal-slot") !== sourceSlot);
-
+                .some(card => card.dataset.recipeId === recipeId && card.closest(".meal-slot") !== sourceSlot);
+                
                 if (isDuplicate) {
                     alert(`⚠ "${recipeTitle}" is already scheduled for ${dayName}!`);
                     return;
                 }
-
+                
                 try {
                     const response = await fetch("/api/calendar/move/", {
                         method: "PUT",
@@ -310,50 +337,55 @@ document.addEventListener("DOMContentLoaded", () => {
                         },
                         body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
                     });
+                    
                     const data = await response.json();
-
+                    
                     if (response.ok && data.status === "success") {
                         processSlotAssignment(slot, recipeId, recipeTitle, newCals, newProt, parentColumn, sourceSlot);
                     }
                 } catch (error) {
-                    console.error("Drop placement sync anomaly:", error);
+                    if (error.message && error.message.includes("message channel closed")) {
+                        processSlotAssignment(slot, recipeId, recipeTitle, newCals, newProt, parentColumn, sourceSlot);
+                    } else {
+                        console.error("Drop placement sync anomaly:", error);
+                    }
                 }
             }
         });
     });
 
-        // =========================================================================
+    //=========================================================================
     // ASYNCHRONOUS DIALOG INTERACTION HANDLERS (OPTIMIZER MODAL)
     // =========================================================================
     const modal = document.getElementById("optimization-modal");
     const openBtn = document.getElementById("run-optimizer-btn");
     const closeBtn = document.getElementById("close-modal-btn");
-
+    
     if (openBtn && modal) {
         openBtn.addEventListener("click", (e) => {
             e.preventDefault();
             modal.showModal();
         });
     }
-
+    
     if (closeBtn && modal) {
         closeBtn.addEventListener("click", () => {
             modal.close();
         });
     }
+    
+    if (modal) {modal.addEventListener("click", (e) => {
+        const dialogDimensions = modal.getBoundingClientRect();
+        if (
+            e.clientX < dialogDimensions.left ||
+            e.clientX > dialogDimensions.right ||
+            e.clientY < dialogDimensions.top ||
+            e.clientY > dialogDimensions.bottom
+        ) {
+            modal.close();
+        }
+    })
+    
+    ;}
 
-    if (modal) {
-        modal.addEventListener("click", (e) => {
-            const dialogDimensions = modal.getBoundingClientRect();
-            if (
-                e.clientX < dialogDimensions.left ||
-                e.clientX > dialogDimensions.right ||
-                e.clientY < dialogDimensions.top ||
-                e.clientY > dialogDimensions.bottom
-            ) {
-                modal.close();
-            }
-        });
-    }
-},
 });
