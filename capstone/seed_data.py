@@ -21,8 +21,8 @@ def seed_project_database():
      # 1. Fetch or Create a Default Operational User Profile
     user = User.objects.first()
     if not user:
-        user = User.objects.create_user(username="testuser", password="password123")
-        print("Created default dashboard test profile -> User: testuser | Pass: password123")
+        user = User.objects.create_user(username="testuser", password="Password123!")
+        print("Created default dashboard test profile -> User: testuser | Pass: Password123!")
 
     # 2. Bulk Create a Master Global Ingredient Pool
     ingredients_data = [

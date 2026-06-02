@@ -45,7 +45,7 @@ body {
 
 /* RESTORED: Baseline execution rules for draggable cards */
 .recipe-card {
-    -webkit-touch-callout: none !important;
+    -webkit-touch-callout: none;
     -webkit-user-select: none; /* For older Safari/Chrome */
     -moz-user-select: none;    /* For older Firefox */
     -ms-user-select: none;     /* For older Internet Explorer/Edge */
