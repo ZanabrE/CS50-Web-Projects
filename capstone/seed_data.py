@@ -96,7 +96,7 @@ def seed_project_database():
         {
             "title": "Salmon Quinoa Bowl",
             "instructions": "Bake salmon fillet. Serve over cooked quinoa with sliced avocado.",
-            "ingredients": [("Salmon Fillet", "150.00", "grams"), ("Quinoa", "80.00", "grams"), ("Avocado", "0.50", "pieces")]
+            "ingredients": [("Salmon Fillet", "150.00", "grams"), ("Quinoa", "500.00", "grams"), ("Avocado", "2.00", "pieces")]
         },
         {
             "title": "Protein Power Scramble",
