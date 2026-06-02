@@ -112,67 +112,67 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll("[data-dragging-source]").forEach(el => el.removeAttribute("data-dragging-source"));
         });
 
-        // --- MOBILE & TABLET TOUCH HANDLERS (WITH DYNAMIC AUTO-SCROLL ENGINE) ---
+        // --- MOBILE & TABLET TOUCH HANDLERS (FIXED SCROLL MECHANICS) ---
+        let touchOffset = { x: 0, y: 0 };
+
         card.addEventListener("touchstart", (e) => {
             if (e.target.classList.contains("remove-meal-btn")) return;
-            
             const targetCard = e.target.closest(".recipe-card");
             if (!targetCard) return;
 
-            // Clear previous highlight rings
             document.querySelectorAll(".recipe-card").forEach(c => c.style.border = "none");
-
-            // Tapping code setup for tiny viewports: Highlight chosen item with a bold clean border
+            
             mobileSelectedCard = targetCard;
             mobileSelectedCard.style.border = "2px solid #0d6efd";
-            
             touchActiveCard = targetCard;
             touchSourceSlot = touchActiveCard.closest(".meal-slot");
             touchActiveCard.style.opacity = "0.6";
-        }, { passive: true }); // Keep start passive so initial taps are fast
+
+            // FIX 2 REMEDY: Calculate specific contact points to prevent card jumping
+            const rect = touchActiveCard.getBoundingClientRect();
+            touchOffset.x = e.touches[0].clientX - rect.left;
+            touchOffset.y = e.touches[0].clientY - rect.top;
+        }, { passive: true });
 
         card.addEventListener("touchmove", (e) => {
             if (!touchActiveCard) return;
-            
-            // FIX 1: Stop the default browser window from scrolling so the item doesn't get left behind or stuck at the bottom
             e.preventDefault(); 
-
-            // Extract the first active finger point coordinates
+            
             const touch = e.touches[0];
-            
-            // Render floating preview badge right underneath the active finger tip location coordinates
-            touchActiveCard.style.position = "fixed";
-            touchActiveCard.style.left = `${touch.clientX - (touchActiveCard.offsetWidth / 2)}px`;
-            touchActiveCard.style.top = `${touch.clientY - (touchActiveCard.offsetHeight / 2)}px`;
-            touchActiveCard.style.zIndex = "9999";
-            touchActiveCard.style.pointerEvents = "none";
 
-            // Dynamic view scroll barriers parameters config settings
+            touchActiveCard.style.position = "fixed";
+            // Uses precise finger offsets instead of hardcoded half-width adjustments
+            touchActiveCard.style.left = `${touch.clientX - touchOffset.x}px`;
+            touchActiveCard.style.top = `${touch.clientY - touchOffset.y}px`;
+            touchActiveCard.style.zIndex = "99999";
+            touchActiveCard.style.pointerEvents = "none"; 
+
+            // Auto Scroll Triggers
             const sens = 60, speed = 14;
-            
-            // Evaluates horizontal position rules to scroll background layouts cleanly during drift movements
             if (touch.clientX > (window.innerWidth - sens)) window.scrollBy(speed, 0);
             else if (touch.clientX < sens) window.scrollBy(-speed, 0);
-            
-            // FIX 2: Smooth out vertical automatic page scrolling when dragging near top/bottom edges
+
             if (touch.clientY > (window.innerHeight - sens)) window.scrollBy(0, speed);
             else if (touch.clientY < sens) window.scrollBy(0, -speed);
-        }, { passive: false }); // VITAL FIX: passive:false allows e.preventDefault() to actually work!
-
+        }, { passive: false });
 
         card.addEventListener("touchend", async (e) => {
             if (!touchActiveCard) return;
 
-            touchActiveCard.style.opacity = "1";
-            touchActiveCard.style.transform = "none";
-            touchActiveCard.style.position = "static";
-            touchActiveCard.style.zIndex = "auto";
-            touchActiveCard.style.pointerEvents = "auto";
-
-            // Extract position parameters from the exact finger release index point
             const touch = e.changedTouches[0];
+            
+            // FIX 3 REMEDY: Force boundary evaluation to find the slot behind the floating preview card
             const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
             const targetSlot = dropTarget ? dropTarget.closest(".meal-slot") : null;
+
+            // FIX 1 REMEDY: Reset variables cleanly so it returns to standard layout flows inside its parent wrapper
+            touchActiveCard.style.opacity = "1";
+            touchActiveCard.style.transform = "none";
+            touchActiveCard.style.position = "";
+            touchActiveCard.style.left = "";
+            touchActiveCard.style.top = "";
+            touchActiveCard.style.zIndex = "";
+            touchActiveCard.style.pointerEvents = "";
 
             if (targetSlot) {
                 const recipeId = touchActiveCard.dataset.recipeId;
@@ -180,7 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 recipeTitle = recipeTitle.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                 const newCals = parseFloat(touchActiveCard.dataset.calories) || 0;
                 const newProt = parseFloat(touchActiveCard.dataset.protein) || 0;
-
                 const parentColumn = targetSlot.closest(".calendar-day-column");
                 const targetDay = parentColumn?.dataset.dayCode;
                 const dayName = parentColumn?.dataset.dayName || "this day";
@@ -207,41 +206,29 @@ document.addEventListener("DOMContentLoaded", () => {
                             },
                             body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
                         });
-                        
                         const data = await response.json();
-                        
                         if (response.ok && data.status === "success") {
-                            processSlotAssignment(
-                                targetSlot, 
-                                recipeId, 
-                                recipeTitle, 
-                                newCals, 
-                                newProt, 
-                                parentColumn, 
-                                touchSourceSlot
-                            );
+                            processSlotAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, parentColumn, touchSourceSlot);
                         }
                     } catch (error) {
                         if (error.message && error.message.includes("message channel closed")) {
-                            processSlotAssignment(
-                                targetSlot, 
-                                recipeId, 
-                                recipeTitle, 
-                                newCals, 
-                                newProt, 
-                                parentColumn, 
-                                touchSourceSlot
-                            );
+                            processSlotAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, parentColumn, touchSourceSlot);
                         } else {
                             console.error("Touch placement sync anomaly:", error);
                         }
                     }
                 }
+            } else {
+                // Fallback safety layer: If dropping outside a calendar slot completely, push the card back inside its native source lane
+                if (touchSourceSlot && touchSourceSlot.querySelector('.slot-occupied-zone')) {
+                    touchSourceSlot.querySelector('.slot-occupied-zone').appendChild(touchActiveCard);
+                }
             }
-            
+
             touchActiveCard = null;
             touchSourceSlot = null;
         });
+
     };
 
     const handleMealRemoval = async (buttonElement) => {
