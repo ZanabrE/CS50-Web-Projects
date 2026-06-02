@@ -1,6 +1,10 @@
 /* =========================================================================
    1. PREMIUM CONTEMPORARY BACKGROUND ENGINE (GLASSMORPHISM STYLE)
    ========================================================================= */
+* {
+  box-sizing: border-box;
+}
+
 body {
     background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%) !important;
     background-attachment: fixed;
