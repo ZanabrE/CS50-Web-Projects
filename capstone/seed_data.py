@@ -56,7 +56,11 @@ def seed_project_database():
         ("Onions", "3.00", "pieces", 14),
         ("Salmon Fillet", "150.00", "grams", 3),
         ("Quinoa", "500.00", "grams", 30),
-        ("Avocado", "2.00", "pieces", 2)
+        ("Avocado", "2.00", "pieces", 2),
+        ("Spinach", "200.00", "grams", 2),
+        ("Broccoli", "300.00", "grams", 3),
+        ("Soy Sauce", "250.00", "ml", 60),
+        ("Greek Yogurt", "500.00", "grams", 7)
     ]
 
     for name, qty, unit, days_out in pantry_items_to_add:
