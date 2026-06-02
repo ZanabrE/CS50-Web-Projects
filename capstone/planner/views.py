@@ -177,7 +177,7 @@ def dashboard_view(request):
     context = {
         "pantry_items": pantry_items,
         "expiring_items": expiring_items,
-        "recommended_recipes": recommended_recipes[:6],  # Constrain UI view window to top 6 hits
+        "recommended_recipes": recommended_recipes,  # Constrain UI view window to top 7 hits
         "today": today,
         "calendar_days": calendar_days,  
         "saved_meals": saved_meals,
