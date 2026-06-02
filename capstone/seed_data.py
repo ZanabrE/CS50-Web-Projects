@@ -18,14 +18,14 @@ def seed_project_database():
     Recipe.objects.all().delete()
     RecipeIngredient.objects.all().delete()
     
-    # 1. Fetch or Create an Operational User Profile
-    user, created = User.objects.get_or_create(username="testuser")
+    # 1. Fetch All users currently in the system
+    all_users = User.objects.all()
 
-    # 2. Always reset the password to ensure it is hashed correctly
-    user.set_password("Password123!")
-    user.save()
-
-    print(f"User 'testuser' is ready. Created now: {created}")
+    # Fallback to create testuser if the database is empty
+    if not all_users.exists():
+        user = User.objects.create_user(username="testuser", password="Password123!")
+        all_users = [user]
+        print("Created default profile: testuser")
 
 
     # 2. Bulk Create a Master Global Ingredient Pool
@@ -67,26 +67,23 @@ def seed_project_database():
         ("Greek Yogurt", "500.00", "grams", 7)
     ]
 
-    for name, qty, unit, days_out in pantry_items_to_add:
-        exp_date = timezone.now().date() + timezone.timedelta(days=days_out)
+    # 3. SEED EVERY USER: Iterates through old accounts AND testuser
+    for user in all_users:
+        print(f"Seeding pantry for: {user.username}")
         
-        # Use filter and first() to safely handle pre-existing duplicate test data
-        existing_item = PantryItem.objects.filter(user=user, ingredient=db_ingredients[name]).first()
+        # Defined pantry_items_to_add list here...
         
-        if existing_item:
-            # Update the first one found to match our new seed variables
-            existing_item.quantity = Decimal(qty)
-            existing_item.unit = unit
-            existing_item.expiration_date = exp_date
-            existing_item.save()
-        else:
-            # Create a brand new item entry if it doesn't exist yet
-            PantryItem.objects.create(
+        for name, qty, unit, days_out in pantry_items_to_add:
+            exp_date = timezone.now().date() + timezone.timedelta(days=days_out)
+            # Use get_or_create to avoid duplicates while ensuring the item exists
+            PantryItem.objects.get_or_create(
                 user=user,
                 ingredient=db_ingredients[name],
-                quantity=Decimal(qty),
-                unit=unit,
-                expiration_date=exp_date
+                defaults={
+                    "quantity": Decimal(qty),
+                    "unit": unit,
+                    "expiration_date": exp_date
+                }
             )
 
     # 4. Define Automated Mock Recipe Blueprints
