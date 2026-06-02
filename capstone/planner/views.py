@@ -20,22 +20,61 @@ def index(request):
 # =========================================================================
 
 def register_view(request):
-    """Handles new user account registration"""
+    """Handles new user account registration and seeds initial pantry items"""
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
+            # 1. Save the new user to the database
             user = form.save()
+
+            # 2. Define the exact baseline staples needed to hit matching thresholds
+            default_staples = [
+                ("Rolled Oats", "500.00", "grams", 2),
+                ("Whole Milk", "1000.00", "ml", 2),
+                ("Honey", "300.00", "grams", 10),
+                ("Chicken Breast", "800.00", "grams", 2),
+                ("White Rice", "2000.00", "grams", 30),
+                ("Eggs", "12.00", "pieces", 3),
+                ("Olive Oil", "500.00", "ml", 60),
+                ("Garlic", "5.00", "pieces", 14),
+                ("Sweet Potatoes", "500.00", "grams", 7),
+                ("Black Beans", "400.00", "grams", 30),
+                ("Onions", "3.00", "pieces", 14),
+                ("Salmon Fillet", "500.00", "grams", 3),
+                ("Quinoa", "500.00", "grams", 30),
+                ("Avocado", "2.00", "pieces", 2),
+                ("Spinach", "200.00", "grams", 2),
+                ("Broccoli", "300.00", "grams", 3),
+                ("Soy Sauce", "250.00", "ml", 60),
+                ("Greek Yogurt", "500.00", "grams", 7),
+            ]
+
+            # 3. Loop through and create a private pantry entry for this specific new user
+            for name, qty, unit, days_out in default_staples:
+                # Look up the global master ingredient row
+                ing = Ingredient.objects.filter(name=name).first()
+                if ing:
+                    exp_date = timezone.now().date() + timezone.timedelta(
+                        days=days_out
+                    )
+                    PantryItem.objects.create(
+                        user=user,
+                        ingredient=ing,
+                        quantity=Decimal(qty),
+                        unit=unit,
+                        expiration_date=exp_date,
+                    )
+
+            # 4. Log the user in and redirect to their newly populated dashboard
             login(request, user)
             return redirect("dashboard")
     else:
         form = UserCreationForm()
-    
+
     # Inject styling helper classes dynamically across all active fields
     for field in form.fields.values():
-        field.widget.attrs.update({
-            'class': 'form-control',
-            'placeholder': ' '
-        })
+        field.widget.attrs.update({"class": "form-control", "placeholder": " "})
+
     return render(request, "planner/register.html", {"form": form})
 
 def login_view(request):
