@@ -51,6 +51,9 @@ def seed_project_database():
         ("Eggs", "12.00", "pieces", 3),
         ("Olive Oil", "500.00", "ml", 60),
         ("Garlic", "5.00", "pieces", 14),
+        ("Sweet Potatoes", "500.00", "grams", 7),
+        ("Black Beans", "400.00", "grams", 30),
+        ("Onions", "3.00", "pieces", 14),
         ("Salmon Fillet", "150.00", "grams", 3),
         ("Quinoa", "500.00", "grams", 30),
         ("Avocado", "2.00", "pieces", 2)
