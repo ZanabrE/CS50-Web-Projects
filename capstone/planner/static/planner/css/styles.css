@@ -5,8 +5,13 @@
   box-sizing: border-box;
 }
 
+html, body {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
 body {
-    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%) !important;
+    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%);
     background-attachment: fixed;
     color: #0F172A;
 }
@@ -37,6 +42,10 @@ body {
 
 .calendar-day-column:hover {
     transform: translateY(-2px); /* Subtle hover lift for tactile response */
+}
+
+.calendar-grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
 }
 
 /* =========================================================================
@@ -144,23 +153,20 @@ dialog#optimization-modal::backdrop {
 4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
 ========================================================================= */
 /* Tablet and Small Screen Intermediate Layout Engine Settings */
+/* Tablet and Small Screen Intermediate Layout Engine Settings */
 @media (max-width: 1199px) and (min-width: 992px) {
     .calendar-grid {
-        display: grid !important;
-        grid-template-columns: repeat(7, minmax(110px, 1fr)) !important;
-        overflow-x: auto !important;
-        padding-bottom: 10px;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+        overflow-x: hidden !important;
     }
     
     .meal-slot {
         min-height: 80px !important;
         padding: 0.5rem !important;
     }
-
+    
     .recipe-card.badge {
-        font-size: 0.65rem !important;
+        font-size: 0.75rem !important; /* Slightly larger for easier tablet tapping */
         padding: 0.4rem !important;
     }
 }
@@ -250,12 +256,16 @@ dialog#optimization-modal::backdrop {
     }
 
     /* Target the button triggers explicitly to center them beautifully inside phone workspaces */
-    #run-optimizer-btn,
-    .optimizer-trigger-button {
+    /* Change this selector at the bottom of your styles.css */
+    #run-optimizer-btn-container {
         display: block !important;
-        margin: 15px auto !important; /* Centers button horizontally inside layout row containers */
+        margin: 10px auto !important;
+        width: 85% !important; 
+    }
+
+    /* Reset the inner link properties to fit cleanly inside the responsive wrapper */
+    #run-optimizer-btn {
+        width: 100% !important;
         text-align: center !important;
-        width: 85% !important; /* Maximizes thumb real estate target size across touch devices */
-        max-width: 320px !important;
     }
 }
