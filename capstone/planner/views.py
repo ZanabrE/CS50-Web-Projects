@@ -130,9 +130,6 @@ def dashboard_view(request):
                 "match_percentage": match_percentage,
                 "missing_count": total_ingredients_count - matched_ingredients
             })
-            
-    # Sort recommendations: highest matching percentages first
-    #recommended_recipes = get_recommended_recipes(request.user)
         
     # Configuration structure for structural frontend calendar template loops
     calendar_days = [
