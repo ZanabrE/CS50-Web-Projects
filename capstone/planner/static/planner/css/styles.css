@@ -45,6 +45,12 @@ body {
 
 /* RESTORED: Baseline execution rules for draggable cards */
 .recipe-card {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none; /* For older Safari/Chrome */
+    -moz-user-select: none;    /* For older Firefox */
+    -ms-user-select: none;     /* For older Internet Explorer/Edge */
+    user-select: none;         /* Standard property */
+    touch-action: none; /* Prevents scrolling while dragging */
     display: block;
     width: 100%;
     box-sizing: border-box;
