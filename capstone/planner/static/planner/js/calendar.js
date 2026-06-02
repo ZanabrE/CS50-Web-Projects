@@ -136,36 +136,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.addEventListener("touchmove", (e) => {
             if (!touchActiveCard) return;
+            
+            // Force browser to stop fighting your custom drag interactions
             e.preventDefault(); 
             
+            // FIX 2 REMEDY: Always target the exact first finger point explicitly
             const touch = e.touches[0];
 
-            touchActiveCard.style.position = "fixed";
-            // Uses precise finger offsets instead of hardcoded half-width adjustments
+            touchActiveCard.style.position = "fixed"; 
             touchActiveCard.style.left = `${touch.clientX - touchOffset.x}px`;
             touchActiveCard.style.top = `${touch.clientY - touchOffset.y}px`;
             touchActiveCard.style.zIndex = "99999";
-            touchActiveCard.style.pointerEvents = "none"; 
+            touchActiveCard.style.pointerEvents = "none"; // Lets elementFromPoint peek through the element
 
             // Auto Scroll Triggers
             const sens = 60, speed = 14;
-            if (touch.clientX > (window.innerWidth - sens)) window.scrollBy(speed, 0);
-            else if (touch.clientX < sens) window.scrollBy(-speed, 0);
+            if (touch.clientX > (window.innerWidth - sens)) {
+                window.scrollBy(speed, 0);
+            } else if (touch.clientX < sens) {
+                window.scrollBy(-speed, 0);
+            }
 
-            if (touch.clientY > (window.innerHeight - sens)) window.scrollBy(0, speed);
-            else if (touch.clientY < sens) window.scrollBy(0, -speed);
+            if (touch.clientY > (window.innerHeight - sens)) {
+                window.scrollBy(0, speed);
+                // FORCE CORRECTION: Adjust the finger anchor point dynamically while the canvas scrolls down
+                touchOffset.y -= speed; 
+            } else if (touch.clientY < sens) {
+                window.scrollBy(0, -speed);
+                // FORCE CORRECTION: Adjust the finger anchor point dynamically while the canvas scrolls up
+                touchOffset.y += speed;
+            }
         }, { passive: false });
 
         card.addEventListener("touchend", async (e) => {
             if (!touchActiveCard) return;
 
+            // FIX 3 REMEDY: Always fetch the exact index 0 point from changedTouches array
             const touch = e.changedTouches[0];
             
-            // FIX 3 REMEDY: Force boundary evaluation to find the slot behind the floating preview card
-            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            // Calculate the drop target relative to the current visible viewport frame, shifting up slightly for fingers
+            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY - 15);
             const targetSlot = dropTarget ? dropTarget.closest(".meal-slot") : null;
 
-            // FIX 1 REMEDY: Reset variables cleanly so it returns to standard layout flows inside its parent wrapper
+            // FIX 1 REMEDY: Reset styling properties cleanly to restore static page layouts
             touchActiveCard.style.opacity = "1";
             touchActiveCard.style.transform = "none";
             touchActiveCard.style.position = "";
@@ -219,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 }
             } else {
-                // Fallback safety layer: If dropping outside a calendar slot completely, push the card back inside its native source lane
+                // Fallback: If dropping completely outside target matrices, push it back into its active source lane zone
                 if (touchSourceSlot && touchSourceSlot.querySelector('.slot-occupied-zone')) {
                     touchSourceSlot.querySelector('.slot-occupied-zone').appendChild(touchActiveCard);
                 }
