@@ -18,11 +18,15 @@ def seed_project_database():
     Recipe.objects.all().delete()
     RecipeIngredient.objects.all().delete()
     
-     # 1. Fetch or Create a Default Operational User Profile
-    user = User.objects.first()
-    if not user:
-        user = User.objects.create_user(username="testuser", password="Password123!")
-        print("Created default dashboard test profile -> User: testuser | Pass: Password123!")
+    # 1. Fetch or Create an Operational User Profile
+    user, created = User.objects.get_or_create(username="testuser")
+
+    # 2. Always reset the password to ensure it is hashed correctly
+    user.set_password("Password123!")
+    user.save()
+
+    print(f"User 'testuser' is ready. Created now: {created}")
+
 
     # 2. Bulk Create a Master Global Ingredient Pool
     ingredients_data = [

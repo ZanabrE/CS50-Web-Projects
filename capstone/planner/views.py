@@ -132,7 +132,7 @@ def dashboard_view(request):
             })
             
     # Sort recommendations: highest matching percentages first
-    recommended_recipes = get_recommended_recipes(request.user)
+    #recommended_recipes = get_recommended_recipes(request.user)
         
     # Configuration structure for structural frontend calendar template loops
     calendar_days = [
