@@ -38,6 +38,18 @@
                 <span class="badge bg-success small">{{ item.match_percentage }}%</span>
                 </div>
 
+                <!-- NEW: Mobile-Only Quick Assignment Selector -->
+                <div class="mobile-action-zone d-block d-lg-none mt-2">
+                    <select class="form-select form-select-sm mobile-slot-selector" data-recipe-id="{{ item.recipe.id }}" data-calories="{{ item.recipe.calories }}" data-protein="{{ item.recipe.protein }}">
+                        <option value="" selected disabled>📅 Quick Add to Calendar...</option>
+                        {% for day in calendar_days %}
+                            <option value="{{ day.code }}|Breakfast">Assign to {{ day.name }} - Breakfast</option>
+                            <option value="{{ day.code }}|Lunch">Assign to {{ day.name }} - Lunch</option>
+                            <option value="{{ day.code }}|Dinner">Assign to {{ day.name }} - Dinner</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                 <!-- Recipe Instructions -->
                 <div class="text-secondary small mt-2">
                 <p class="mb-1">{{ item.recipe.instructions }}</p>

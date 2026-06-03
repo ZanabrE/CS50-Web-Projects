@@ -202,6 +202,21 @@ dialog#optimization-modal::backdrop {
         padding: 0.5rem !important;
     }
 
+    .recipe-card {
+        cursor: default !important;
+        touch-action: auto !important;
+    }
+    
+    /* Style the mobile selector dropdown to match your glassmorphism look */
+    .mobile-slot-selector {
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        background-color: #ffffff;
+        color: #334155;
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+
     /* Targets the inner formatting structure wrapper inside the optimizer dialogue overlay */
     dialog#optimization-modal {
         border: none;
