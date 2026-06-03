@@ -103,9 +103,10 @@ body {
 
 /* Clean segregation layer forces high contrast styles onto your dropped matrix badges */
 .meal-slot .recipe-card.badge {
-    background-color: #0d6efd !important; /* Pure high contrast Bootstrap corporate blue background */
-    color: #ffffff !important;            /* Pure readable white text styling */
-    border: none !important;              /* Wipes away sidebar gray borders layout lines */
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    display: flex !important;            
+    border: none !important;              
     box-shadow: 0 4px 6px -1px rgba(13, 110, 253, 0.2);
     display: flex !important;              /* Forces correct inner visibility parameters */
 }
@@ -153,7 +154,6 @@ dialog#optimization-modal::backdrop {
 4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
 ========================================================================= */
 /* Tablet and Small Screen Intermediate Layout Engine Settings */
-/* Tablet and Small Screen Intermediate Layout Engine Settings */
 @media (max-width: 1199px) and (min-width: 992px) {
     .calendar-grid {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
@@ -189,32 +189,60 @@ dialog#optimization-modal::backdrop {
         display: block !important;
     }
 
-    /* SAFE MOBILE CELL STYLING: Vertically lines up meal blocks inside the expanded day tracking grid */
-    .meal-slot {
-        min-height: 70px !important;
-        padding: 0.6rem !important;
-        margin-top: 5px !important;
+    /* SAFE MOBILE CELL STYLING: Vertically lines up meal blocks inside the expanded day tracking grid */ 
+    .meal-slot { 
+        min-height: 70px !important; 
+        padding: 0.6rem !important; 
+        margin-top: 5px !important; 
+    } 
+
+    /* Resizes layout parameters inside dropped recipe badges for quick mobile touch visibility */ 
+    .recipe-card.badge { 
+        font-size: 0.75rem !important; 
+        padding: 0.5rem !important; 
+    } 
+
+    .recipe-card { 
+        cursor: default !important; 
+        touch-action: none !important; 
+        -webkit-user-select: none !important; /* Prevents text selection while dragging */
+        user-select: none !important; 
     }
 
-    /* Resizes layout parameters inside dropped recipe badges for quick mobile touch visibility */
-    .recipe-card.badge {
-        font-size: 0.75rem !important;
+    /* --- FIX: COMPACT STYLE WHILE DRAGGING ON MOBILE --- */
+    .recipe-card[style*="position: fixed"] {
+        width: 170px !important;      /* Forces it to shrink from 100% to a small badge */
+        background-color: #0d6efd !important; /* Keeps the blue theme */
+        color: #ffffff !important;
         padding: 0.5rem !important;
+        font-size: 0.7rem !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        border: none !important;
     }
 
-    .recipe-card {
-        cursor: default !important;
-        touch-action: auto !important;
+    /* Force white text for the title while floating */
+    .recipe-card[style*="position: fixed"] strong {
+        color: #ffffff !important;
     }
-    
-    /* Style the mobile selector dropdown to match your glassmorphism look */
-    .mobile-slot-selector {
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        background-color: #ffffff;
-        color: #334155;
-        padding: 0.4rem;
-        font-size: 0.8rem;
+
+    /* Hide the huge description and instructions instantly during the drag */
+    .recipe-card[style*="position: fixed"] p,
+    .recipe-card[style*="position: fixed"] .text-secondary,
+    .recipe-card[style*="position: fixed"] .text-muted,
+    .recipe-card[style*="position: fixed"] .badge.bg-success,
+    .recipe-card[style*="position: fixed"] .remove-meal-btn {
+        display: none !important;
+    }
+
+    /* Style the mobile selector dropdown to match your glassmorphism look */ 
+    .mobile-slot-selector { 
+        border-radius: 8px; 
+        border: 1px solid #cbd5e1; 
+        background-color: #ffffff; 
+        color: #334155; 
+        padding: 0.4rem; 
+        font-size: 0.8rem; 
     }
 
     /* Targets the inner formatting structure wrapper inside the optimizer dialogue overlay */
