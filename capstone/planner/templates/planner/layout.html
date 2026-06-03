@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Smart Meal Planner{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
@@ -68,6 +68,6 @@
     <script src="{% static 'planner/js/bootstrap.local.js' %}"></script>
     
     <!-- Core interactive client script -->
-    <script src="{% static 'planner/js/calendar.js' %}"></script>
+    <script src="{% static 'planner/js/calendar.js' %}" defer></script>
 </body>
 </html>
