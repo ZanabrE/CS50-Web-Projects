@@ -23,20 +23,69 @@ document.addEventListener("DOMContentLoaded", () => {
     initMobileTouchEngine();
     initMobileDropdownAccessibility();
     initOptimizerModalMechanics();
+
+    document.querySelectorAll(".calendar-day-column").forEach(column => {
+        column.addEventListener("click", (e) => {
+            // Avoid triggering when clicking internal cards
+            if (e.target.closest(".recipe-card")) return;
+
+            const dayName = column.dataset.dayName;
+            document.getElementById("active-day-tracker-label").innerText = `Selected: ${dayName}`;
+
+            // Recalculate and update the progress bars for THIS day
+            if (typeof calculateAndRenderDayMacros === "function") {
+                calculateAndRenderDayMacros(column);
+            }
+        });
+    });
 });
 
+// ==========================================
+// 1.5 NUTRITIONAL CALCULATION ENGINE
+// ==========================================
+function calculateAndRenderDayMacros(column) {
+    if (!column) return;
+
+    let totalCalories = 0;
+    let totalProtein = 0;
+
+    // Find all recipe cards currently scheduled in this day's slots
+    const scheduledCards = column.querySelectorAll(".recipe-card");
+
+    scheduledCards.forEach(card => {
+        // Parse numerical values from data attributes
+        totalCalories += parseFloat(card.dataset.calories) || 0;
+        totalProtein += parseFloat(card.dataset.protein) || 0;
+    });
+
+    // Update the progress bars in the left sidebar
+    const calProgress = document.getElementById("calories-progress");
+    const protProgress = document.getElementById("protein-progress");
+    const calText = document.getElementById("calories-text-value");
+    const protText = document.getElementById("protein-text-value");
+
+    if (calProgress) calProgress.value = totalCalories;
+    if (protProgress) protProgress.value = totalProtein;
+    if (calText) calText.innerText = `${Math.round(totalCalories)} / 2000 kcal`;
+    if (protText) protText.innerText = `${Math.round(totalProtein)} / 150g`;
+}
 
 // ==========================================
-// 2. DESKTOP NATIVE DRAG & DROP ENGINE
+// 2. DESKTOP NATIVE DRAG & DROP ENGINE (FIXED UI RESETS & MACRO SYNC)
 // ==========================================
 function initDesktopDragAndDrop() {
-    // Global delegation ensures dynamically rendered block elements retain handlers
     document.addEventListener("dragstart", (e) => {
         const card = e.target.closest(".recipe-card");
         if (!card) return;
         
+        e.stopPropagation(); 
         card.classList.add("dragging");
-        e.dataTransfer.setData("text/plain", card.dataset.recipeId);
+        
+        // Store metadata in the dataTransfer object for the drop event
+        e.dataTransfer.setData("recipeId", card.dataset.recipeId);
+        e.dataTransfer.setData("calories", card.dataset.calories || "0");
+        e.dataTransfer.setData("protein", card.dataset.protein || "0");
+        e.dataTransfer.effectAllowed = "move";
     });
 
     document.addEventListener("dragend", (e) => {
@@ -49,7 +98,7 @@ function initDesktopDragAndDrop() {
     document.addEventListener("dragover", (e) => {
         const slot = e.target.closest(".meal-slot");
         if (!slot) return;
-        e.preventDefault(); // Unlocks drop payload reception permissions
+        e.preventDefault(); 
         slot.classList.add("drag-hover");
     });
 
@@ -62,19 +111,100 @@ function initDesktopDragAndDrop() {
     document.addEventListener("drop", async (e) => {
         const slot = e.target.closest(".meal-slot");
         if (!slot) return;
-        e.preventDefault();
+        e.preventDefault(); 
         slot.classList.remove("drag-hover");
 
         const draggingCard = document.querySelector(".recipe-card.dragging");
         if (!draggingCard) return;
 
-        const sourceSlot = draggingCard.closest(".meal-slot");
+        // FIX 1: TRANSFORM CARD CONTENT (PREVENT OVERSIZE)
+        // Extract title and hide instructions/missing items list
+        const recipeTitle = draggingCard.querySelector("strong")?.innerText || "Recipe";
+        const cals = e.dataTransfer.getData("calories");
+        const prot = e.dataTransfer.getData("protein");
+
+        // Completely rewrite innerHTML to be a clean "Badge"
+        draggingCard.innerHTML = `
+            <strong class="text-white" style="font-size: 0.75rem;">${recipeTitle}</strong>
+            <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                    aria-label="Remove" style="font-size: 0.5rem; padding: 0.1rem; cursor: pointer;"></button>
+        `;
+
+        // FIX 2: UI RESET STYLING
+        draggingCard.style.all = "unset"; 
+        draggingCard.style.display = "flex"; 
+        draggingCard.style.justifyContent = "space-between";
+        draggingCard.style.alignItems = "center";
+        draggingCard.style.width = "100%";
+        draggingCard.classList.remove("p-2", "mb-2", "border", "bg-light"); 
+        draggingCard.classList.add("badge", "bg-primary", "w-100", "py-1", "text-wrap"); 
+
+        // FIX 3: MAP DATA TO SLOT FOR CALCULATIONS
+        slot.dataset.currentCalories = cals;
+        slot.dataset.currentProtein = prot;
+
+        const occupiedZone = slot.querySelector(".slot-occupied-zone");
+        if (occupiedZone) {
+            occupiedZone.appendChild(draggingCard);
+        }
+
+        // TRIGGER BACKEND SYNC
+        await executeCardPlacementPipeline(draggingCard, slot);
+
+        // TRIGGER UI CALCULATION (Left Sidebar Progress Bars)
         const targetColumn = slot.closest(".calendar-day-column");
-        
-        await executeCardPlacementPipeline(draggingCard, slot, sourceSlot, targetColumn);
+        if (typeof calculateAndRenderDayMacros === "function") {
+            calculateAndRenderDayMacros(targetColumn);
+        }
     });
 }
 
+// ==========================================
+// 2.5 GLOBAL EVENT DELEGATION: PERMANENT MEAL REMOVAL
+// ==========================================
+document.addEventListener("click", async (e) => {
+    const removeBtn = e.target.closest(".remove-meal-btn");
+    if (removeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const cardToRemove = removeBtn.closest(".recipe-card");
+        const column = cardToRemove.closest(".calendar-day-column");
+        const slot = cardToRemove.closest(".meal-slot");
+
+        if (cardToRemove) {
+            const recipeId = cardToRemove.dataset.recipeId;
+            const dayCode = column.dataset.dayCode;
+            const mealType = slot.dataset.mealType;
+
+            // PERMANENT DELETE: Send a DELETE request to Django
+            try {
+                const response = await fetch("/api/calendar/delete/", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCsrfToken()
+                    },
+                    body: JSON.stringify({ 
+                        recipe_id: recipeId,
+                        date_code: dayCode,
+                        meal_type: mealType
+                    })
+                });
+
+                if (response.ok) {
+                    // Only remove from UI if the database confirms deletion
+                    cardToRemove.remove();
+                    
+                    // Recalculate macros for the column after successful removal
+                    calculateAndRenderDayMacros(column);
+                }
+            } catch (err) {
+                console.error("Database deletion failed:", err);
+            }
+        }
+    }
+});
 
 // ==========================================
 // 3. MOBILE & TABLET GESTURE ENGINE (FIXED VIEWPANEL INTERSECTIONS)
@@ -212,13 +342,13 @@ function initMobileDropdownAccessibility() {
     });
 }
 
-
 // ==========================================
-// 5. UNIFIED DATA PIPELINE & DATABASE DATABASE SYNC
+// 5. UNIFIED DATA PIPELINE & DATABASE SYNC
 // ==========================================
 async function executeCardPlacementPipeline(card, targetSlot, sourceSlot, targetColumn) {
     if (!card) return;
 
+    // Safety: If no valid slot was found (dropped in dead space), send it back
     if (!targetSlot) {
         revertCardToOrigin(card, sourceSlot);
         return;
@@ -226,8 +356,8 @@ async function executeCardPlacementPipeline(card, targetSlot, sourceSlot, target
 
     const recipeId = card.dataset.recipeId;
     let recipeTitle = card.querySelector("strong")?.innerText || "Selected Recipe";
-    recipeTitle = recipeTitle.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); // Sanitize string bounds
     
+    // Extract nutritional data for live tracker updates
     const newCals = parseFloat(card.dataset.calories) || 0;
     const newProt = parseFloat(card.dataset.protein) || 0;
     
@@ -237,7 +367,7 @@ async function executeCardPlacementPipeline(card, targetSlot, sourceSlot, target
     const csrfToken = getCsrfToken();
 
     if (recipeId && targetDay && csrfToken) {
-        // Enforce scheduling uniqueness limits
+        // Enforce scheduling uniqueness (Don't allow same recipe twice on the same day)
         const isDuplicate = Array.from(targetColumn.querySelectorAll(".recipe-card"))
             .some(c => c.dataset.recipeId === recipeId && c.closest(".meal-slot") !== sourceSlot);
 
@@ -254,17 +384,23 @@ async function executeCardPlacementPipeline(card, targetSlot, sourceSlot, target
                     "Content-Type": "application/json",
                     "X-CSRFToken": csrfToken
                 },
-                body: JSON.stringify({ plan_id: recipeId, new_date: targetDay, meal_type: mealType })
+                body: JSON.stringify({
+                    plan_id: recipeId,
+                    new_date: targetDay,
+                    meal_type: mealType
+                })
             });
-            
+
             const data = await response.json();
-            
+
             if (response.ok && data.status === "success") {
                 const sourceColumn = sourceSlot ? sourceSlot.closest(".calendar-day-column") : null;
-                processUIAssignment(targetSlot, recipeId, newCals, newProt, sourceSlot);
+                
+                // Success: Transform the card into a clean badge and place it
+                processUIAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, sourceSlot);
 
-                // Keep daily column budgets accurately updated on layout alterations
-                if (typeof calculateAndRenderDayMacros === "function"){
+                // FORCE UPDATE: Update Progress Bars on the left sidebar immediately
+                if (typeof calculateAndRenderDayMacros === "function") {
                     calculateAndRenderDayMacros(targetColumn);
                     if (sourceColumn && sourceColumn !== targetColumn) {
                         calculateAndRenderDayMacros(sourceColumn);
@@ -274,8 +410,10 @@ async function executeCardPlacementPipeline(card, targetSlot, sourceSlot, target
                 revertCardToOrigin(card, sourceSlot);
             }
         } catch (error) {
+            // Handle browser-specific "channel closed" edge cases gracefully
             if (error.message && error.message.includes("message channel closed")) {
-                processUIAssignment(targetSlot, recipeId, newCals, newProt, sourceSlot);
+                processUIAssignment(targetSlot, recipeId, recipeTitle, newCals, newProt, sourceSlot);
+                if (typeof calculateAndRenderDayMacros === "function") calculateAndRenderDayMacros(targetColumn);
             } else {
                 console.error("Database sync anomaly:", error);
                 revertCardToOrigin(card, sourceSlot);
@@ -289,31 +427,49 @@ async function executeCardPlacementPipeline(card, targetSlot, sourceSlot, target
 function revertCardToOrigin(card, sourceSlot) {
     if (!sourceSlot || !card) return;
     const occupiedZone = sourceSlot.querySelector(".slot-occupied-zone");
-
     if (occupiedZone && !occupiedZone.contains(card)) {
         occupiedZone.appendChild(card);
     }
 }
 
-function processUIAssignment(targetSlot, recipeId, cals, prot, sourceSlot) {
+function processUIAssignment(targetSlot, recipeId, recipeTitle, cals, prot, sourceSlot) {
+    // 1. Clear source slot if moving an existing meal
     if (sourceSlot) {
         sourceSlot.dataset.currentCalories = "0";
         sourceSlot.dataset.currentProtein = "0";
-
         const oldZone = sourceSlot.querySelector(".slot-occupied-zone");
-
         if (oldZone) oldZone.innerHTML = "";
     }
 
+    // 2. Map data to the new slot
     targetSlot.dataset.currentCalories = cals;
     targetSlot.dataset.currentProtein = prot;
-
     const targetZone = targetSlot.querySelector(".slot-occupied-zone");
 
     if (targetZone) {
-        const draggingCard = document.querySelector(`[data-recipe-id="${recipeId}"]`) || mobileSelectedCard;
+        // Find the element being moved (using ID and dragging class state)
+        const draggingCard = document.querySelector(`[data-recipe-id="${recipeId}"].dragging`) || 
+                             document.querySelector(`[data-recipe-id="${recipeId}"]`);
 
         if (draggingCard) {
+            // FIX: COMPLETELY RE-RENDER INTERNAL HTML
+            // This strips out "Ingredients" and "Instructions" so the card isn't giant.
+            draggingCard.innerHTML = `
+                <strong class="text-white" style="pointer-events: none;">${recipeTitle}</strong>
+                <button type="button" class="btn-close btn-close-white remove-meal-btn" 
+                        aria-label="Remove" style="font-size: 0.5rem; padding: 0.2rem; cursor: pointer;"></button>
+            `;
+            
+            // Apply standard badge styling and remove sidebar classes
+            draggingCard.className = "recipe-card badge bg-primary w-100 py-1 text-wrap d-flex justify-content-between align-items-center";
+            
+            // Reset sizing overrides
+            draggingCard.style.all = "unset"; 
+            draggingCard.style.display = "flex";
+            draggingCard.style.width = "100%";
+            draggingCard.style.position = "static";
+            draggingCard.style.cursor = "grab";
+
             targetZone.appendChild(draggingCard);
         }
     }
@@ -323,24 +479,32 @@ function processUIAssignment(targetSlot, recipeId, cals, prot, sourceSlot) {
 // 6. ASYNCHRONOUS DIALOG INTERACTION HANDLERS (OPTIMIZER MODAL)
 // ==========================================
 function initOptimizerModalMechanics() {
-    const modal = document.getElementById("optimization-modal");
-    const openBtn = document.getElementById("run-optimizer-btn"); // Targets the navbar link directly
-    const closeBtn = modal.querySelector(".close-modal-btn");
+    const optimizerBtn = document.getElementById('run-optimizer-btn');
+    const modal = document.getElementById('optimization-modal');
+    const closeBtn = document.getElementById('close-modal-btn');
 
-    if (openBtn && modal) {
-        openBtn.addEventListener("click", (e) => {
+    // Ensure all critical elements exist before attaching listeners
+    if (!modal) return;
+
+    if (optimizerBtn) {
+        optimizerBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            modal.showModal();
+            modal.showModal(); // Use showModal for native backdrop support
         });
     }
 
-    if (closeBtn && modal) {
-        closeBtn.addEventListener("click", () => {
-            const dialogDimentions = modal.getBoundingClientRect();
-
-            if (e.clientX < dialogDimentions.left || e.clientX > dialogDimentions.right || e.clientY < dialogDimentions.top || e.clientY > dialogDimentions.bottom) {
-                modal.close();
-            }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.close(); // Use native .close() method
         });
     }
+
+    // IMPROVED UX: One single listener for the backdrop click
+    modal.addEventListener('click', (e) => {
+        // Only close if the click target is exactly the <dialog> itself
+        // (meaning they clicked the backdrop, not a button inside)
+        if (e.target === modal) {
+            modal.close();
+        }
+    });
 }
