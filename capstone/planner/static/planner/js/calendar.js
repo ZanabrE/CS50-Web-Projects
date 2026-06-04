@@ -71,20 +71,15 @@ function calculateAndRenderDayMacros(column) {
 }
 
 // ==========================================
-// 2. DESKTOP NATIVE DRAG & DROP ENGINE (FIXED UI RESETS & MACRO SYNC)
+// 2. DESKTOP NATIVE DRAG & DROP ENGINE (FIXED UI RESETS)
 // ==========================================
 function initDesktopDragAndDrop() {
     document.addEventListener("dragstart", (e) => {
         const card = e.target.closest(".recipe-card");
         if (!card) return;
-        
-        e.stopPropagation(); 
+        e.stopPropagation();
         card.classList.add("dragging");
-        
-        // Store metadata in the dataTransfer object for the drop event
-        e.dataTransfer.setData("recipeId", card.dataset.recipeId);
-        e.dataTransfer.setData("calories", card.dataset.calories || "0");
-        e.dataTransfer.setData("protein", card.dataset.protein || "0");
+        e.dataTransfer.setData("text/plain", card.dataset.recipeId);
         e.dataTransfer.effectAllowed = "move";
     });
 
@@ -98,64 +93,38 @@ function initDesktopDragAndDrop() {
     document.addEventListener("dragover", (e) => {
         const slot = e.target.closest(".meal-slot");
         if (!slot) return;
-        e.preventDefault(); 
+        e.preventDefault(); // MANDATORY: Allows the drop to occur
         slot.classList.add("drag-hover");
-    });
-
-    document.addEventListener("dragleave", (e) => {
-        const slot = e.target.closest(".meal-slot");
-        if (!slot) return;
-        slot.classList.remove("drag-hover");
     });
 
     document.addEventListener("drop", async (e) => {
         const slot = e.target.closest(".meal-slot");
         if (!slot) return;
-        e.preventDefault(); 
+        e.preventDefault();
         slot.classList.remove("drag-hover");
 
         const draggingCard = document.querySelector(".recipe-card.dragging");
         if (!draggingCard) return;
 
-        // FIX 1: TRANSFORM CARD CONTENT (PREVENT OVERSIZE)
-        // Extract title and hide instructions/missing items list
-        const recipeTitle = draggingCard.querySelector("strong")?.innerText || "Recipe";
-        const cals = e.dataTransfer.getData("calories");
-        const prot = e.dataTransfer.getData("protein");
-
-        // Completely rewrite innerHTML to be a clean "Badge"
-        draggingCard.innerHTML = `
-            <strong class="text-white" style="font-size: 0.75rem;">${recipeTitle}</strong>
-            <button type="button" class="btn-close btn-close-white remove-meal-btn" 
-                    aria-label="Remove" style="font-size: 0.5rem; padding: 0.1rem; cursor: pointer;"></button>
-        `;
-
-        // FIX 2: UI RESET STYLING
+        // FIX: PERMANENT OVERSIZE SOLUTION
+        // Completely strip sidebar styles and force calendar badge styling
         draggingCard.style.all = "unset"; 
         draggingCard.style.display = "flex"; 
-        draggingCard.style.justifyContent = "space-between";
-        draggingCard.style.alignItems = "center";
         draggingCard.style.width = "100%";
         draggingCard.classList.remove("p-2", "mb-2", "border", "bg-light"); 
-        draggingCard.classList.add("badge", "bg-primary", "w-100", "py-1", "text-wrap"); 
-
-        // FIX 3: MAP DATA TO SLOT FOR CALCULATIONS
-        slot.dataset.currentCalories = cals;
-        slot.dataset.currentProtein = prot;
+        draggingCard.classList.add("badge", "bg-primary", "w-100", "py-1");
 
         const occupiedZone = slot.querySelector(".slot-occupied-zone");
         if (occupiedZone) {
             occupiedZone.appendChild(draggingCard);
         }
 
-        // TRIGGER BACKEND SYNC
+        // Trigger database sync
         await executeCardPlacementPipeline(draggingCard, slot);
-
-        // TRIGGER UI CALCULATION (Left Sidebar Progress Bars)
-        const targetColumn = slot.closest(".calendar-day-column");
-        if (typeof calculateAndRenderDayMacros === "function") {
-            calculateAndRenderDayMacros(targetColumn);
-        }
+        
+        // Trigger real-time calculation for the day
+        const column = slot.closest(".calendar-day-column");
+        calculateAndRenderDayMacros(column);
     });
 }
 
@@ -172,13 +141,9 @@ document.addEventListener("click", async (e) => {
         const column = cardToRemove.closest(".calendar-day-column");
         const slot = cardToRemove.closest(".meal-slot");
 
-        if (cardToRemove) {
-            const recipeId = cardToRemove.dataset.recipeId;
-            const dayCode = column.dataset.dayCode;
-            const mealType = slot.dataset.mealType;
-
-            // PERMANENT DELETE: Send a DELETE request to Django
+        if (cardToRemove && column && slot) {
             try {
+                // TELL DJANGO TO DELETE PERMANENTLY
                 const response = await fetch("/api/calendar/delete/", {
                     method: "DELETE",
                     headers: {
@@ -186,21 +151,18 @@ document.addEventListener("click", async (e) => {
                         "X-CSRFToken": getCsrfToken()
                     },
                     body: JSON.stringify({ 
-                        recipe_id: recipeId,
-                        date_code: dayCode,
-                        meal_type: mealType
+                        recipe_id: cardToRemove.dataset.recipeId,
+                        date_code: column.dataset.dayCode,
+                        meal_type: slot.dataset.mealType
                     })
                 });
 
                 if (response.ok) {
-                    // Only remove from UI if the database confirms deletion
-                    cardToRemove.remove();
-                    
-                    // Recalculate macros for the column after successful removal
-                    calculateAndRenderDayMacros(column);
+                    cardToRemove.remove(); // Only remove from UI if DB success
+                    calculateAndRenderDayMacros(column); // Recalculate totals
                 }
             } catch (err) {
-                console.error("Database deletion failed:", err);
+                console.error("Critical Deletion Error:", err);
             }
         }
     }
@@ -467,6 +429,7 @@ function processUIAssignment(targetSlot, recipeId, recipeTitle, cals, prot, sour
             draggingCard.style.all = "unset"; 
             draggingCard.style.display = "flex";
             draggingCard.style.width = "100%";
+            draggingCard.style.height = "auto";
             draggingCard.style.position = "static";
             draggingCard.style.cursor = "grab";
 
