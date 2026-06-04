@@ -1,5 +1,7 @@
 # Capstone Final Project: Smart Meal Planner & Food Waste Optimizer
 
+#### Video Demo: <INSERT_YOUR_YOUTUBE_LINK_HERE>
+
 ## Distinctiveness and Complexity
 
 ### Distinctiveness
