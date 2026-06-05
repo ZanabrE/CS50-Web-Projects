@@ -1,314 +1,340 @@
-/* =========================================================================
-   1. PREMIUM CONTEMPORARY BACKGROUND ENGINE (GLASSMORPHISM STYLE)
+/* ========================================================================= 
+   1. PREMIUM CONTEMPORARY BACKGROUND ENGINE (GLASSMORPHISM STYLE) 
+   ========================================================================= */ 
+* { 
+    box-sizing: border-box; 
+} 
+
+html, body { 
+    max-width: 100% !important; 
+    overflow-x: hidden !important; 
+} 
+
+body { 
+    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%); 
+    background-attachment: fixed; 
+    color: #0F172A; 
+} 
+
+.navbar { 
+    background-color: #1E293B !important; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+} 
+
+.navbar .nav-link, .navbar .navbar-brand { 
+    color: #F8FAFC !important; 
+} 
+
+/* Semi-transparent "Glass" Panel Floating Effect for Dashboard Sections */ 
+.card { 
+    background: rgba(255, 255, 255, 0.75) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.6) !important; 
+    backdrop-filter: blur(10px); 
+} 
+
+/* Make individual day columns float cleanly over the base background canvas */ 
+.calendar-day-column { 
+    background: rgba(255, 255, 255, 0.9) !important; 
+    border: 1px solid rgba(226, 232, 240, 0.8) !important; 
+    border-radius: 14px !important; 
+    transition: transform 0.2s ease; 
+    /* FIX 1: Overrides browser 'min-content' scaling behaviors completely */
+    min-width: 0 !important; 
+} 
+
+.calendar-day-column:hover { 
+    transform: translateY(-2px); /* Subtle hover lift for tactile response */ 
+} 
+
+/* FIX 2: Rigorous 7-Column Allocation with absolute min-width protection */
+.calendar-grid { 
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important; 
+    width: 100% !important;
+}
+
+/* FIX 3: Force sub-elements to stick cleanly inside slot wrappers */
+.meal-slot, .slot-occupied-zone {
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+/* ========================================================================= 
+   2. REFRESHED CONTRAST PATTERNS FOR SECTIONS 
    ========================================================================= */
-* {
-  box-sizing: border-box;
+
+#recipe-pool { 
+    background: rgba(255, 255, 255, 0.8) !important; 
 }
 
-html, body {
-  max-width: 100% !important;
-  overflow-x: hidden !important;
+/* Base card rules */
+.recipe-card { 
+    user-select: none; 
+    touch-action: none; 
+    display: block; 
+    width: 100%; 
+    box-sizing: border-box; 
+    transition: transform 0.15s ease, opacity 0.15s ease; 
+    cursor: grab;
 }
 
-body {
-    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 50%, #CBD5E1 100%);
-    background-attachment: fixed;
-    color: #0F172A;
+/* Sidebar Specific Styles */
+#recipe-pool .recipe-card { 
+    background-color: #ffffff !important; 
+    border: 1px solid #e2e8f0 !important; 
+    color: #0F172A !important; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); 
 }
 
-.navbar {
-    background-color: #1E293B !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.navbar .nav-link, .navbar .navbar-brand {
-    color: #F8FAFC !important;
-}
-
-/* Semi-transparent "Glass" Panel Floating Effect for Dashboard Sections */
-.card {
-    background: rgba(255, 255, 255, 0.75) !important;
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    backdrop-filter: blur(10px);
-}
-
-/* Make individual day columns float cleanly over the base background canvas */
-.calendar-day-column {
-    background: rgba(255, 255, 255, 0.9) !important;
-    border: 1px solid rgba(226, 232, 240, 0.8) !important;
-    border-radius: 14px !important;
-    transition: transform 0.2s ease;
-}
-
-.calendar-day-column:hover {
-    transform: translateY(-2px); /* Subtle hover lift for tactile response */
-}
-
-.calendar-grid {
-  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-}
-
-/* =========================================================================
-   2. REFRESHED CONTRAST PATTERNS FOR SECTIONS
-   ========================================================================= */
-/* Recipe Pool Sidebar Panel Wrapper Adjustment */
-#recipe-pool {
-    background: rgba(255, 255, 255, 0.8) !important;
-}
-
-/* RESTORED: Baseline execution rules for draggable cards */
-.recipe-card {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none; /* For older Safari/Chrome */
-    -moz-user-select: none;    /* For older Firefox */
-    -ms-user-select: none;     /* For older Internet Explorer/Edge */
-    user-select: none;         /* Standard property */
-    touch-action: none; /* Prevents scrolling while dragging */
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    transition: transform 0.15s ease, opacity 0.15s ease;
-}
-
-/* Sharp, crisp containers to contrast sidebar elements against the blurred backdrop */
-#recipe-pool .recipe-card {
-    background-color: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #0F172A !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-#recipe-pool .recipe-card strong {
-    color: #0F172A !important;
-}
-
-/* Fades out the recipe card while it is being actively dragged */
-.recipe-card.dragging {
-    opacity: 0.4 !important;
-    transform: scale(0.96);
-    border: 2px dashed #0d6efd !important;
+/* Dragging State - MERGED AND OPTIMIZED */
+.recipe-card.dragging { 
+    opacity: 0.4 !important; 
+    transform: scale(0.9) !important; /* Slightly smaller for better visibility */
+    border: 2px dashed #0d6efd !important; 
+    z-index: 9999;
 }
 
 /* Target Drag Drop Zones */
-.meal-slot {
-    background-color: rgba(247, 250, 252, 0.6) !important;
-    border: 2px dashed #cbd5e0 !important;
-    transition: all 0.2s ease-in-out;
+.meal-slot { 
+    background-color: rgba(247, 250, 252, 0.6) !important; 
+    border: 2px dashed #cbd5e0 !important; 
+    transition: all 0.2s ease-in-out; 
+    overflow: hidden; /* CRITICAL: Clips any overflowing content */
+    display: flex; 
+    flex-direction: column; 
+    min-height: 70px;
 }
 
-.meal-slot.drag-hover {
-    background-color: #E0F2FE !important;
-    border-color: #38BDF8 !important;
+.meal-slot.drag-hover { 
+    background-color: #E0F2FE !important; 
+    border-color: #38BDF8 !important; 
 }
 
-/* Clean segregation layer forces high contrast styles onto your dropped matrix badges */
-.meal-slot .recipe-card.badge {
+/* Calendar Badge Transformation - REFINED */
+.meal-slot .recipe-card.badge { 
+    width: 100% !important; 
+    max-width: 100%; 
+    box-sizing: border-box; 
+    display: flex !important; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 4px 8px !important; 
+    margin: 0 !important; /* Remove sidebar margins */
     background-color: #0d6efd !important;
-    color: #ffffff !important;
-    display: flex !important;            
-    border: none !important;              
-    box-shadow: 0 4px 6px -1px rgba(13, 110, 253, 0.2);
-    display: flex !important;              /* Forces correct inner visibility parameters */
+    border: none !important;
+    border-radius: 4px;
 }
 
-/* Ensures bold item structures inside dropped calendar badges stay bright white */
-.meal-slot .recipe-card.badge strong {
-    color: #ffffff !important;
-}
-
-/* =========================================================================
-   3. METRIC PROGRESS TRACKERS & MODAL DIALOG OVERLAYS
-   ========================================================================= */
-progress {
-    accent-color: #48bb78;
-    height: 10px;
-    border-radius: 5px;
+.meal-slot .recipe-card.badge strong { 
+    color: #ffffff !important; 
+    font-size: 0.7rem;
+    white-space: nowrap;
     overflow: hidden;
-    background-color: #edf2f7;
-    border: none;
+    text-overflow: ellipsis; /* Prevents long titles from breaking the slot */
 }
 
-/* Smooth interpolation physics for filling metric progress bars on drop calculations */
-progress::-webkit-progress-value {
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-progress::-moz-progress-bar {
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* Ensure the Close Button is visible inside the Blue Badge */
+.meal-slot .remove-meal-btn {
+    filter: brightness(0) invert(1); /* Makes the black 'X' white */
+    opacity: 0.8;
 }
 
-/* Native HTML5 Overlay Enhancement Layer */
-dialog#optimization-modal {
-    border: none;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(15px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+/* ========================================================================= 
+   3. METRIC PROGRESS TRACKERS & MODAL DIALOG OVERLAYS 
+   ========================================================================= */ 
+progress { 
+    accent-color: #48bb78; 
+    height: 10px; 
+    border-radius: 5px; 
+    overflow: hidden; 
+    background-color: #edf2f7; 
+    border: none; 
+} 
+
+/* Smooth physics for progress fills */ 
+progress::-webkit-progress-value { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); } 
+progress::-moz-progress-bar { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); } 
+
+/* --- ACCESSIBLE NATIVE DIALOG SYSTEM --- */ 
+dialog#optimization-modal { 
+    border: none; 
+    border-radius: 20px; 
+    background: rgba(255, 255, 255, 0.98); 
+    backdrop-filter: blur(15px); 
+    width: 90vw; 
+    max-width: 480px; 
+    max-height: 85vh; 
+    padding: 1.5rem; 
+    box-sizing: border-box; 
+    /* DO NOT add a display property here; native engine toggles display states */
+} 
+
+/* Targets ONLY the base structural component content wrapper inside the modal box */ 
+dialog#optimization-modal article { 
+    display: flex; 
+    flex-direction: column; 
+    width: 100%; 
+    height: 100%;
+} 
+
+/* Protects Bootstrap's native inline item distribution rules inside your list rows */
+dialog#optimization-modal .list-group-item {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100%;
+    text-align: left !important;
 }
 
-dialog#optimization-modal::backdrop {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
+dialog#optimization-modal::backdrop { 
+    background: rgba(15, 23, 42, 0.6); 
+    backdrop-filter: blur(5px); 
 }
 
-/* =========================================================================
-4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION
-========================================================================= */
-/* Tablet and Small Screen Intermediate Layout Engine Settings */
-@media (max-width: 1199px) and (min-width: 992px) {
-    .calendar-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
-        overflow-x: hidden !important;
-    }
-    
-    .meal-slot {
-        min-height: 80px !important;
-        padding: 0.5rem !important;
-    }
-    
-    .recipe-card.badge {
-        font-size: 0.75rem !important; /* Slightly larger for easier tablet tapping */
-        padding: 0.4rem !important;
-    }
-}
+/* ========================================================================= 
+   4. HYBRID MOBILE-RESPONSIVE ACCORDION LAYER TRANSFORMATION 
+   ========================================================================= */ 
 
-/* Complete Mobile & Tablet Breakpoint Transformation Logic (991px and down) */
-@media (max-width: 991px) {
-    /* Collapses the grid layout completely to prevent touch overflow bugs */
-    .calendar-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 15px !important;
-        width: 100% !important;
-        overflow-x: hidden !important;
-    }
-
-    /* Expands day columns to stack cleanly down the viewport canvas */
-    .calendar-day-column {
-        width: 100% !important;
-        margin-bottom: 5px !important;
-        display: block !important;
-    }
-
-    /* SAFE MOBILE CELL STYLING: Vertically lines up meal blocks inside the expanded day tracking grid */ 
-    .meal-slot { 
-        min-height: 70px !important; 
-        padding: 0.6rem !important; 
-        margin-top: 5px !important; 
+/* Intermediate Tablet Screen Engine Rules (Landscape/Large Tablets) */ 
+@media (max-width: 1199px) and (min-width: 992px) { 
+    .calendar-grid { 
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important; 
+        overflow-x: hidden !important; 
     } 
-
-    /* Resizes layout parameters inside dropped recipe badges for quick mobile touch visibility */ 
-    .recipe-card.badge { 
-        font-size: 0.75rem !important; 
+    .meal-slot { 
+        min-height: 80px !important; 
         padding: 0.5rem !important; 
     } 
+    .recipe-card.badge { 
+        font-size: 0.75rem !important; 
+        padding: 0.4rem !important; 
+    } 
+} 
 
+/* ========================================== 
+   MOBILE & PORTRAIT TABLET BREAKPOINT (991px and down) 
+   ========================================== */ 
+@media (max-width: 991px) { 
+    /* Calendar Adaptive Stack Matrix Layout */ 
+    .calendar-grid { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        gap: 15px !important; 
+        overflow-x: hidden !important; 
+        width: 100% !important; 
+    } 
+    .calendar-day-column { 
+        display: block !important; 
+        width: 100% !important; 
+        margin-bottom: 5px !important; 
+    } 
+    .meal-slot { 
+        min-height: 70px; 
+        padding: 0.6rem; 
+        margin-top: 5px; 
+    } 
+
+    /* Interactive UI Touch Handling */ 
     .recipe-card { 
-        cursor: default !important; 
-        touch-action: none !important; 
-        -webkit-user-select: none !important; /* Prevents text selection while dragging */
-        user-select: none !important; 
-    }
-
-    /* --- FIX: COMPACT STYLE WHILE DRAGGING ON MOBILE --- */
-    .recipe-card[style*="position: fixed"] {
-        width: 170px !important;      /* Forces it to shrink from 100% to a small badge */
-        background-color: #0d6efd !important; /* Keeps the blue theme */
-        color: #ffffff !important;
-        padding: 0.5rem !important;
-        font-size: 0.7rem !important;
-        border-radius: 8px !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
-        border: none !important;
-    }
-
-    /* Force white text for the title while floating */
-    .recipe-card[style*="position: fixed"] strong {
-        color: #ffffff !important;
-    }
-
-    /* Hide the huge description and instructions instantly during the drag */
-    .recipe-card[style*="position: fixed"] p,
-    .recipe-card[style*="position: fixed"] .text-secondary,
-    .recipe-card[style*="position: fixed"] .text-muted,
-    .recipe-card[style*="position: fixed"] .badge.bg-success,
-    .recipe-card[style*="position: fixed"] .remove-meal-btn {
-        display: none !important;
-    }
-
-    /* Style the mobile selector dropdown to match your glassmorphism look */ 
+        touch-action: none; 
+        user-select: none; 
+        -webkit-user-select: none; 
+    } 
+    .recipe-card.badge { 
+        font-size: 0.75rem; 
+        padding: 0.5rem; 
+    } 
     .mobile-slot-selector { 
         border-radius: 8px; 
         border: 1px solid #cbd5e1; 
-        background-color: #ffffff; 
-        color: #334155; 
         padding: 0.4rem; 
         font-size: 0.8rem; 
-    }
+    } 
 
-    /* Targets the inner formatting structure wrapper inside the optimizer dialogue overlay */
-    dialog#optimization-modal {
-        border: none;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.98) !important;
-        backdrop-filter: blur(15px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3) !important;
-        
-        /* Absolute fixed view isolation - overrides parent inheritance lines */
-        position: fixed !important;
-        display: none; /* Managed cleanly via JavaScript showModal() mechanisms */
-        
-        /* Calculate screen boundaries completely independent of background width */
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        
-        /* Structural sizing constraints */
-        margin: 0 !important;
-        width: 90vw !important;
-        max-width: 480px !important;
-        max-height: 85vh !important;
-        overflow-y: auto;
-        z-index: 999999 !important;
-        box-sizing: border-box !important;
-    }
+    /* --- COMPACT STYLE DRAG FLOATING STATE --- */ 
+    .recipe-card[style*="position: fixed"] { 
+        width: 170px !important; 
+        background-color: #0d6efd !important; 
+        color: #ffffff !important; 
+        padding: 0.5rem !important; 
+        font-size: 0.7rem !important; 
+        border-radius: 8px !important; 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important; 
+        border: none !important; 
+    } 
+    .recipe-card[style*="position: fixed"] strong { color: #ffffff !important; } 
+    .recipe-card[style*="position: fixed"] p, 
+    .recipe-card[style*="position: fixed"] .text-secondary, 
+    .recipe-card[style*="position: fixed"] .text-muted, 
+    .recipe-card[style*="position: fixed"] .badge.bg-success, 
+    .recipe-card[style*="position: fixed"] .remove-meal-btn { 
+        display: none !important; 
+    } 
 
-    /* Force state indicator to show block styling when native engine opens it */
-    dialog#optimization-modal[open] {
-        display: block !important;
-    }
+    /* --- ACCESSIBLE NATIVE DIALOG SYSTEM --- */ 
+    dialog#optimization-modal { 
+        border: none; 
+        border-radius: 20px; 
+        background: rgba(255, 255, 255, 0.98); 
+        backdrop-filter: blur(15px); 
+        width: 90vw; 
+        max-width: 480px; 
+        max-height: 85vh; 
+        padding: 1.5rem; 
+        box-sizing: border-box; 
+        margin: auto !important; 
+    } 
+    dialog#optimization-modal::backdrop { 
+        background: rgba(15, 23, 42, 0.6); 
+        backdrop-filter: blur(5px); 
+    } 
 
-    /* Ensure backdrop covers the entire extended width canvas layout */
-    dialog#optimization-modal::backdrop {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(15, 23, 42, 0.6) !important;
-        backdrop-filter: blur(5px) !important;
-        z-index: 999998 !important;
-    }
+    dialog#optimization-modal article { 
+        display: flex !important; 
+        flex-direction: column !important; 
+        align-items: center !important; 
+        text-align: center !important; 
+        width: 100% !important; 
+    } 
+    dialog#optimization-modal .list-group-item { 
+        display: flex !important; 
+        flex-direction: row !important; 
+        justify-content: space-between !important; 
+        align-items: center !important; 
+        width: 100% !important; 
+        text-align: left !important; 
+    } 
 
-    /* Centers structural text labels, buttons, and close inputs inside modal box overlays */
-    dialog#optimization-modal .modal-content-wrapper,
-    dialog#optimization-modal div {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
-    }
+    /* Responsive Optimizer Launch Controls Layout */ 
+    #run-optimizer-btn-container { 
+        display: block; 
+        margin: 10px auto; 
+        width: 85%; 
+    } 
+    #run-optimizer-btn { 
+        width: 100%; 
+        text-align: center; 
+    } 
+} 
 
-    /* Target the button triggers explicitly to center them beautifully inside phone workspaces */
-    /* Change this selector at the bottom of your styles.css */
-    #run-optimizer-btn-container {
-        display: block !important;
-        margin: 10px auto !important;
-        width: 85% !important; 
-    }
-
-    /* Reset the inner link properties to fit cleanly inside the responsive wrapper */
-    #run-optimizer-btn {
-        width: 100% !important;
-        text-align: center !important;
-    }
+/* Desktop Matrix Rule Enforcement */ 
+@media (min-width: 992px) { 
+    .calendar-grid { 
+        display: grid !important; 
+        grid-template-columns: repeat(7, minmax(0, 1fr)) !important; 
+    } 
 }
+
+/* ========================================================================= 
+   TOUCH INTUITION PERFORMANCE ACCELERATOR (ELIMINATES MOBILE INPUT LAG)
+   ========================================================================= */
+.recipe-card,
+.meal-slot,
+.slot-occupied-zone,
+.calendar-day-column {
+    /* Tell the browser's native viewport rendering engine to completely bypass */
+    /* the 300ms double-tap-to-zoom tracking logic on mobile touch events */
+    touch-action: manipulation !important;
+}
+
