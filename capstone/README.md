@@ -34,10 +34,16 @@ To help understand the architecture of this application, here is a breakdown of 
 
 ### Backend Python Architecture
 *   `capstone/settings.py`: Configures global project parameters, registers the core application module, establishes secure static media paths, and configures the database settings. It was modified to map the explicit application configuration class (`planner.apps.PlannerConfig`) to enable modern project features.
+*   `capstone/asgi.py` & `wsgi.py`: Standard entry-point configuration files used by web servers to deploy and run the Django application.
+*   `capstone/__init__.py` & `planner/__init__.py`: Empty Python files that tell the system to treat these folders as packages containing runnable code.
+*   `planner/admin.py`: Registers your custom models (`PantryItem`, `Recipe`, etc.) with the built-in Django Admin portal so administrators can manage database entries easily.
+*   `planner/apps.py`: Contains the system configuration settings specifically for your `planner` application module.
 *   `planner/models.py`: Contains the object-relational mapping (ORM) abstractions for the application database. Defines `Ingredient` (tracking names and categories), `Recipe` (tracking instructions and prep times), `RecipeIngredient` (a custom join table establishing specific quantities/units per recipe), `PantryItem` (tracking user inventory, amounts, and expiration dates), and `MealPlan` (binding recipes to specific user accounts and calendar dates).
+*   `planner/signals.py`: Houses custom background triggers that automatically perform actions (like recalculating metrics or updating profiles) when database changes occur.
 *   `planner/views.py`: Controls the application logic. Contains the user registration, login, and logout controller routines. Houses the primary analytical matching engine that loops through expiring pantry elements to filter valid recipe structures. Additionally, manages the RESTful JSON API endpoints that respond to frontend JavaScript requests.
 *   `planner/urls.py`: Defines the routing matrix for the application. Maps the primary visual templates to their respective view controllers and organizes the dedicated API endpoints (e.g., `/api/pantry`, `/api/calendar/move`) used by the client-side scripts.
 *   `planner/tests.py`: Implements automated test suites utilizing Django’s testing framework. Validates the mathematical accuracy of the recipe matching engine, ensures expiration warnings trigger under correct date thresholds, and verifies that the JSON API endpoints respond with accurate HTTP status codes under valid or invalid user states.
+*   `planner/migrations/`: A folder containing your database history files (like `0001_initial.py`). These tell Django how to build and alter your SQL tables over time.
 *   `seed_data.py`: A database population utility script. It automatically interfaces with the Django ORM to generate dummy user accounts, preloaded ingredients, sample recipes, and baseline kitchen mock data, enabling testers to instantly view the software's data processing potential without manual data entry.
 
 ### Frontend JavaScript & CSS Engineering
