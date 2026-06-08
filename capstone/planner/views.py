@@ -70,10 +70,10 @@ def register_view(request):
             return redirect("dashboard")
     else:
         form = UserCreationForm()
-
-    # Inject styling helper classes dynamically across all active fields
-    for field in form.fields.values():
-        field.widget.attrs.update({"class": "form-control", "placeholder": " "})
+        
+        # Inject styling helper classes dynamically across all active fields
+        for field in form.fields.values():
+            field.widget.attrs.update({"class": "form-control", "placeholder": " "})
 
     return render(request, "planner/register.html", {"form": form})
 
