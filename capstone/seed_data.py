@@ -9,7 +9,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "capstone.settings")
 django.setup()
 
 from django.contrib.auth.models import User
-from planner.models import Ingredient, PantryItem, Recipe, RecipeIngredient
+from planner.models import Ingredient, PantryItem, Recipe, RecipeIngredient, MealPlan
 
 def seed_project_database():
     print("Initializing test infrastructure database seeding...")
@@ -17,6 +17,7 @@ def seed_project_database():
     PantryItem.objects.all().delete()
     Recipe.objects.all().delete()
     RecipeIngredient.objects.all().delete()
+    MealPlan.objects.all().delete()
     
     # 1. Fetch All users currently in the system
     all_users = User.objects.all()
@@ -148,6 +149,32 @@ def seed_project_database():
                 defaults={"quantity": Decimal(qty), "unit": unit}
             )
 
+    # 6. Seed Meal Plans for Users
+    print("Scheduling initial mock meal plans...")
+    all_recipes = list(Recipe.objects.all())
+    today = timezone.now().date()
+    
+    if all_recipes:
+        for user in all_users:
+            # Assigns a random recipe for Breakfast today
+            MealPlan.objects.get_or_create(
+                user=user,
+                date=today,
+                meal_type='Breakfast',
+                defaults={"recipe": random.choice(all_recipes)}
+            )
+            
+            # Assigns a different random recipe for Dinner today
+            MealPlan.objects.get_or_create(
+                user=user,
+                date=today,
+                meal_type='Dinner',
+                defaults={"recipe": random.choice(all_recipes)}
+            )
+
+    print(f"Successfully seeded testing modules.")
+    print(f"Total recipes tracked: {Recipe.objects.count()}")
+    print(f"Total scheduled meal plan slots: {MealPlan.objects.count()}")
     print(f"Successfully seeded testing modules. Total recipes tracked: {Recipe.objects.count()}")
 
 if __name__ == "__main__":
