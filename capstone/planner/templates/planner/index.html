@@ -7,6 +7,8 @@
     
     <!-- LEFT SIDEBAR: Live Real-Time Nutritional Target Trackers -->
     <aside class="col-12 col-md-4 col-lg-3" id="macro-summary-panel">
+
+        <!-- DAILY PROGRESS PANEL -->
         <div class="card p-3 shadow-sm mb-3">
             <h5 class="card-title fw-bold">Daily Progress Overview</h5>
             <p class="text-primary small fw-bold mb-3" id="active-day-tracker-label">Selected: Monday</p>
@@ -22,6 +24,43 @@
                 <progress id="protein-progress" class="w-100" value="{{ mon_prot }}" max="150"></progress>
                 <small class="text-muted d-block text-end" id="protein-text-value">{{ mon_prot }} / 150g</small>
             </div>
+        </div>
+
+        <!-- NEW PANTRY INTERACTIVE CONTROL ELEMENT: Connects to pantry.js -->
+        <div class="card p-3 shadow-sm mb-3">
+            <h6 class="fw-bold text-secondary">Quick Add to Pantry</h6>
+            
+            <form id="add-pantry-form">
+                <!-- Hidden input for your CSRF security token -->
+                <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+                <div class="mb-2">
+                    <label class="small text-muted mb-1">Ingredient</label>
+                    <select id="pantry-ingredient-select" class="form-select form-select-sm" required>
+                        <option value="">Select item...</option>
+                        {% for ingredient in ingredients %}
+                            <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label class="small text-muted mb-1">Quantity</label>
+                    <input type="number" id="pantry-quantity-input" class="form-control form-control-sm" required min="1">
+                </div>
+
+                <div class="mb-2">
+                    <label class="small text-muted mb-1">Unit</label>
+                    <input type="text" id="pantry-unit-input" class="form-control form-control-sm" placeholder="grams">
+                </div>
+
+                <div class="mb-2">
+                    <label class="small text-muted mb-1">Expiration Date</label>
+                    <input type="date" id="pantry-exp-input" class="form-control form-control-sm">
+                </div>
+
+                <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">Save to Pantry</button>
+            </form>
         </div>
 
         <!-- DYNAMIC RECIPE POOL -->

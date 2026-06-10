@@ -220,6 +220,7 @@ def dashboard_view(request):
         "daily_macros": daily_macros,
         "mon_cals": daily_macros["MON"]["calories"],
         "mon_prot": daily_macros["MON"]["protein"],
+        "ingredients": all_ingredients,
     }
     
     return render(request, "planner/index.html", context) 
