@@ -228,36 +228,57 @@ def dashboard_view(request):
 # =========================================================================
 # 3. ASYNCHRONOUS REST API ENDPOINTS
 # =========================================================================
-  
+
 @login_required
 def api_add_pantry_item(request):
-    """Asysnchronously adds a new item to the user's pantry via a JavaScript POST payload."""
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            ingredient_id = data.get("ingredient_id")
-            quantity = Decimal(str(data.get("quantity", 0.01)))
-            unit = data.get("unit","grams")
-            expiration_date = data.get("expiration_date")
-            
-            ingredient = Ingredient.objects.get(id=ingredient_id)
-            
-            item = PantryItem.objects.create(
-                user=request.user,
-                ingredient=ingredient,
-                quantity=quantity,
-                unit=unit,
-                expiration_date=expiration_date
-            )
-            return JsonResponse({
-                    "status": "success",
-                    "item_id": item.id,
-                    "message": f"Added {ingredient.name} successfully."
-                }, status=201)
-        except (Ingredient.DoesNotExist, Exception) as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    """Asynchronously add a new item to the user's pantry via a JavaScript POST payload."""
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        ingredient_id = data.get("ingredient_id")
+        unit = data.get("unit", "grams")
         
-    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+        # 1. Safeguard Decimal Conversion against empty/bad strings
+        raw_quantity = data.get("quantity")
+        if raw_quantity is None or str(raw_quantity).strip() == "":
+            raw_quantity = 0.01
+        try:
+            quantity = Decimal(str(raw_quantity))
+        except InvalidOperation:
+            return JsonResponse({"status": "error", "message": "Invalid quantity format."}, status=400)
+
+        # 2. FIX: Safeguard expiration date against empty strings ""
+        expiration_date = data.get("expiration_date")
+        if not expiration_date or str(expiration_date).strip() == "":
+            expiration_date = None
+
+        # 3. Fetch the ingredient securely
+        try:
+            ingredient = Ingredient.objects.get(id=ingredient_id)
+        except Ingredient.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Selected ingredient does not exist."}, status=400)
+
+        # 4. Create the item safely
+        item = PantryItem.objects.create(
+            user=request.user,
+            ingredient=ingredient,
+            quantity=quantity,
+            unit=unit,
+            expiration_date=expiration_date
+        )
+
+        return JsonResponse({
+            "status": "success",
+            "item_id": item.id,
+            "message": f"Added {ingredient.name} successfully."
+        }, status=201)
+
+    except Exception as e:
+        # Fallback tracking for any other unexpected backend crashes
+        return JsonResponse({"status": "error", "message": f"Server processing anomaly: {str(e)}"}, status=500)
+
 
 @login_required
 def api_delete_pantry_item(request, item_id):
